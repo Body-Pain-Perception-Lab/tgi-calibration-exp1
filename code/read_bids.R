@@ -1,5 +1,7 @@
 read_bids <- function(projdir,sub,ses,task,dat) {
   
+  library("stringr")
+  
   # Generate comprehensive list of file names
   filenames_list <- c()
   for (i in sub){

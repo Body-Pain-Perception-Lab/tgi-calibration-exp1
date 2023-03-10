@@ -1761,31 +1761,40 @@ pre code {
 
 
 <!-- rnb-text-begin -->
-<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-Notebook. When you execute code within the notebook, the results appear
-beneath the code.</p>
-<p>Try executing this chunk by clicking the <em>Run</em> button within
-the chunk or by placing your cursor inside it and pressing
-<em>Ctrl+Shift+Enter</em>.</p>
+<p>Define packages</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChjYXJzKVxuYGBgIn0= -->
-<pre class="r"><code>plot(cars)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2luc3RhbGwucGFja2FnZXMoXCJzdHJpbmdyXCIpXG5gYGAifQ== -->
+<pre class="r"><code>#install.packages(&quot;stringr&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the
-toolbar or by pressing <em>Ctrl+Alt+I</em>.</p>
-<p>When you save the notebook, an HTML file containing the code and
-output will be saved alongside it (click the <em>Preview</em> button or
-press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
-<p>The preview shows you a rendered HTML copy of the contents of the
-editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not
-run any R code chunks. Instead, the output of the chunk when it was last
-run in the editor is displayed.</p>
+<p>Import data</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKFwicmVhZF9iaWRzLlJcIilcbnByb2ogPC0gXCIvbW50L2Zhc3Rfc2NyYXRjaC9icHAvdGdpLWNhbGlicmF0aW9uLWV4cDFcIlxucHJvamRpciA8LSBmaWxlLnBhdGgocHJvamRpciwgXCJkYXRhXCIpXG5zdWIgPC0gMToyNlxuc2VzIDwtIDE6MlxudGFzayA8LSBcImZhc3RFc3RcIlxuZGF0IDwtIFwiYmVoXCJcbmRmIDwtIHJlYWRfYmlkcyhwcm9qZGF0LHN1YixzZXMsdGFzayxkYXQpXG5kZlxuYGBgIn0= -->
+<pre class="r"><code>source(&quot;read_bids.R&quot;)
+proj &lt;- &quot;/mnt/fast_scratch/bpp/tgi-calibration-exp1&quot;
+projdir &lt;- file.path(projdir, &quot;data&quot;)
+sub &lt;- 1:26
+ses &lt;- 1:2
+task &lt;- &quot;fastEst&quot;
+dat &lt;- &quot;beh&quot;
+df &lt;- read_bids(projdat,sub,ses,task,dat)
+df</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MCwibmNvbCI6Miwic3VtbWFyeSI6W119LCJyZGYiOiJVa1JZTXdwWUNnQUFBQU1BQkFJQ0FBTUZBQUFBQUFWVlZFWXRPQUFBQkFJQUFBQUJBQVFBQ1FBQUFBRjRBQUFERXdBQUFBSUFBQU1OQUFBQUFBQUFCQUlBQUFBQkFBUUFDUUFBQUFac1pYWmxiSE1BQUFBUUFBQUFBQUFBQkFJQUFBQUJBQVFBQ1FBQUFBVmpiR0Z6Y3dBQUFCQUFBQUFCQUFRQUNRQUFBQVptWVdOMGIzSUFBQUQrQUFBRERRQUFBQUFBQUFRQ0FBQUMvd0FBQUJBQUFBQUFBQUFFQWdBQUEvOEFBQUFRQUFBQUFRQUVBQWtBQUFBR1ptRmpkRzl5QUFBQS9nQUFCQUlBQUFBQkFBUUFDUUFBQUFWdVlXMWxjd0FBQUJBQUFBQUNBQVFBQ1FBQUFBVnpkV0pmYmdBRUFBa0FBQUFGYzJWelgyNEFBQVFDQUFBQUFRQUVBQWtBQUFBSmNtOTNMbTVoYldWekFBQUFEUUFBQUFBQUFBUUNBQUFEL3dBQUFCQUFBQUFCQUFRQUNRQUFBQXBrWVhSaExtWnlZVzFsQUFBQS9nQUFCQUlBQUFBQkFBUUFDUUFBQUFkdmNIUnBiMjV6QUFBQ0V3QUFBQVVBQUFBUUFBQUFBUUFFQUFrQUFBQUJjZ0FBQUJBQUFBQUJBQVFBQ1FBQUFBOTFibTVoYldWa0xXTm9kVzVyTFRVQUFBQUtBQUFBQVFBQUFBQUFBQUFOQUFBQUFRQUFBQUFBQUFBTkFBQUFBUUFBQUFJQUFBUUNBQUFFL3dBQUFCQUFBQUFGQUFRQUNRQUFBQVpsYm1kcGJtVUFCQUFKQUFBQUJXeGhZbVZzQUFRQUNRQUFBQTV5YjNkdVlXMWxjeTV3Y21sdWRBQUVBQWtBQUFBS2NtOTNjeTUwYjNSaGJBQUVBQWtBQUFBS1kyOXNjeTUwYjNSaGJBQUFBUDRBQUFEKyJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["sub_n"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["ses_n"],"name":[2],"type":["fctr"],"align":["left"]}],"data":[],"options":{"columns":{"min":{},"max":[10],"total":[2]},"rows":{"min":[10],"max":[10],"total":[0]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ3RybCtTaGlmdCtFbnRlciouIAoKYGBge3J9CnBsb3QoY2FycykKYGBgCgpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ3RybCtBbHQrSSouCgpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkN0cmwrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4KClRoZSBwcmV2aWV3IHNob3dzIHlvdSBhIHJlbmRlcmVkIEhUTUwgY29weSBvZiB0aGUgY29udGVudHMgb2YgdGhlIGVkaXRvci4gQ29uc2VxdWVudGx5LCB1bmxpa2UgKktuaXQqLCAqUHJldmlldyogZG9lcyBub3QgcnVuIGFueSBSIGNvZGUgY2h1bmtzLiBJbnN0ZWFkLCB0aGUgb3V0cHV0IG9mIHRoZSBjaHVuayB3aGVuIGl0IHdhcyBsYXN0IHJ1biBpbiB0aGUgZWRpdG9yIGlzIGRpc3BsYXllZC4K</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKRGVmaW5lIHBhY2thZ2VzCmBgYHtyfQojaW5zdGFsbC5wYWNrYWdlcygic3RyaW5nciIpCmBgYAoKSW1wb3J0IGRhdGEKYGBge3J9CnNvdXJjZSgicmVhZF9iaWRzLlIiKQpwcm9qIDwtICIvbW50L2Zhc3Rfc2NyYXRjaC9icHAvdGdpLWNhbGlicmF0aW9uLWV4cDEiCnByb2pkaXIgPC0gZmlsZS5wYXRoKHByb2pkaXIsICJkYXRhIikKc3ViIDwtIDE6MjYKc2VzIDwtIDE6Mgp0YXNrIDwtICJmYXN0RXN0IgpkYXQgPC0gImJlaCIKZGYgPC0gcmVhZF9iaWRzKHByb2pkYXQsc3ViLHNlcyx0YXNrLGRhdCkKZGYKYGBgCgo=</div>
 
 
 
