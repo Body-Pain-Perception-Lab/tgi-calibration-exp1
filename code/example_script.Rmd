@@ -3,17 +3,30 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-Define packages
-```{r}
+# Load required packages 
+```{r warning=FALSE}
 #install.packages("stringr")
+install.packages("osfr")
+
 ```
 
-Import data
+# Load data
+```{r}
+api_token = "qLAhwHyVcjjE7I5N4HCAPOGRvB8N00va4qBKwK7EEutD9DoOyDrRtkzaoYQbr2ehBubhUQ"
+project_id <- "u43kt"
+
+library(osfr)
+osf_auth(token = api_token)
+project_id <- "u43kt"
+files <- osf_ls_files(project_id)
+```
+
+
 ```{r}
 source("read_bids.R")
 proj <- "/mnt/fast_scratch/bpp/tgi-calibration-exp1"
 projdir <- file.path(projdir, "data")
-sub <- 1:26
+sub <- 1:27
 ses <- 1:2
 task <- "fastEst"
 dat <- "beh"
