@@ -1754,50 +1754,162 @@ display: none;
 <h1>Load required packages</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2luc3RhbGwucGFja2FnZXMoXCJzdHJpbmdyXCIpXG5pbnN0YWxsLnBhY2thZ2VzKFwib3NmclwiKVxuYGBgIn0= -->
-<pre class="r"><code>#install.packages(&quot;stringr&quot;)
-install.packages(&quot;osfr&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShcInN0cmluZ3JcIilcbmxpYnJhcnkoXCJyZWFkclwiKVxuXG5gYGAifQ== -->
+<pre class="r"><code>library(&quot;stringr&quot;)
+library(&quot;readr&quot;)
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gaW5zdGFsbC5wYWNrYWdlcyA6IFVwZGF0aW5nIGxvYWRlZCBwYWNrYWdlc1xuIn0= -->
-<pre><code>Error in install.packages : Updating loaded packages</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="load-data" class="section level1">
-<h1>Load data</h1>
+<div id="temporary-solution" class="section level1">
+<h1>Temporary solution</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYXBpX3Rva2VuID0gXCJxTEFod0h5VmNqakU3STVONEhDQVBPR1J2QjhOMDB2YTRxQkt3SzdFRXV0RDlEb095RHJSdGt6YW9ZUWJyMmVoQnViaFVRXCJcbnByb2plY3RfaWQgPC0gXCJ1NDNrdFwiXG5cbmxpYnJhcnkob3Nmcilcbm9zZl9hdXRoKHRva2VuID0gYXBpX3Rva2VuKVxucHJvamVjdF9pZCA8LSBcInU0M2t0XCJcbmZpbGVzIDwtIG9zZl9sc19maWxlcyhwcm9qZWN0X2lkKVxuYGBgIn0= -->
-<pre class="r"><code>api_token = &quot;qLAhwHyVcjjE7I5N4HCAPOGRvB8N00va4qBKwK7EEutD9DoOyDrRtkzaoYQbr2ehBubhUQ&quot;
-project_id &lt;- &quot;u43kt&quot;
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKGhlcmU6OmhlcmUoXCJjb2RlXCIsXCJyZWFkX2JpZHMuUlwiKSlcblxuIyBJbml0aWFsaXplIHBhcmFtZXRlcnNcbnByb2pkaXIgPC0gXCIvVXNlcnMvYXUzNDI5OTUvRG9jdW1lbnRzL01JTkRMQUIyMDIyX0NhbGlicmF0aW9uVEdJXCIgIyMjIFRPIFVQREFURVxuc3ViIDwtIDE6MjdcbnNlcyA8LSAxOjJcbmRhdCA8LSBcImJlaFwiXG5zYXZlIDwtIFRSVUVcblxuIyBEZWZpbmUgaW5wdXQgcGFyYW1ldGVyc1xudGFza3MgPC0gYyhcImZhc3RFc3RcIiwgXCJmYXN0VHJsXCIsIFwicHNpXCIsIFwidmFzXCIpXG5cbiMgSW5pdGlhbGl6ZSBlbXB0eSBkYXRhZnJhbWUgdG8gc3RvcmUgcmVzdWx0c1xuZGZfYXZhaWwgPC0gZGF0YS5mcmFtZShzdWIgPSBudW1lcmljKCksIHNlcyA9IG51bWVyaWMoKSwgc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFKVxuXG4jIExvb3Agb3ZlciBhbGwgdGFza3NcbmZvciAodGFzayBpbiB0YXNrcykge1xuICBcbiAgIyBJbXBvcnQgZGF0YSBmb3IgYWxsIHBhcnRpY2lwYW50cyBhbmQgc2Vzc2lvbnNcbiAgZGZfdGFzayA8LSByZWFkX2JpZHMocHJvamRpciwgc3ViLCBzZXMsIHRhc2ssIGRhdCwgc2F2ZSlcbiAgXG4gICMgQ291bnQgbnVtYmVyIG9mIGF2YWlsYWJsZSBmaWxlcyBmb3IgZWFjaCBwYXJ0aWNpcGFudCBhbmQgc2Vzc2lvblxuICBhdmFpbF9jb3VudHMgPC0gYXMuZGF0YS5mcmFtZSh0YWJsZShkZl90YXNrJHN1YiwgZGZfdGFzayRzZXMpKVxuICBuYW1lcyhhdmFpbF9jb3VudHMpIDwtIGMoXCJzdWJcIiwgXCJzZXNcIiwgdGFzaylcbiAgXG4gICMgTWVyZ2Ugd2l0aCByZXN1bHRzIGRhdGFmcmFtZVxuICBkZl9hdmFpbCA8LSBtZXJnZShkZl9hdmFpbCwgYXZhaWxfY291bnRzLCBhbGwgPSBUUlVFKVxufVxuXG4jIFJlcGxhY2UgTkEgdmFsdWVzIHdpdGggMFxuZGZfYXZhaWxbaXMubmEoZGZfYXZhaWwpXSA8LSAwXG5cbiMgUHJpbnQgcmVzdWx0c1xucHJpbnQoZGZfYXZhaWwpXG5gYGAifQ== -->
+<pre class="r"><code>source(here::here(&quot;code&quot;,&quot;read_bids.R&quot;))
 
-library(osfr)
-osf_auth(token = api_token)
-project_id &lt;- &quot;u43kt&quot;
-files &lt;- osf_ls_files(project_id)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKFwicmVhZF9iaWRzLlJcIilcbnByb2ogPC0gXCIvbW50L2Zhc3Rfc2NyYXRjaC9icHAvdGdpLWNhbGlicmF0aW9uLWV4cDFcIlxucHJvamRpciA8LSBmaWxlLnBhdGgocHJvamRpciwgXCJkYXRhXCIpXG5zdWIgPC0gMToyN1xuc2VzIDwtIDE6MlxudGFzayA8LSBcImZhc3RFc3RcIlxuZGF0IDwtIFwiYmVoXCJcbmRmIDwtIHJlYWRfYmlkcyhwcm9qZGF0LHN1YixzZXMsdGFzayxkYXQpXG5kZlxuYGBgIn0= -->
-<pre class="r"><code>source(&quot;read_bids.R&quot;)
-proj &lt;- &quot;/mnt/fast_scratch/bpp/tgi-calibration-exp1&quot;
-projdir &lt;- file.path(projdir, &quot;data&quot;)
+# Initialize parameters
+projdir &lt;- &quot;/Users/au342995/Documents/MINDLAB2022_CalibrationTGI&quot; ### TO UPDATE
 sub &lt;- 1:27
 ses &lt;- 1:2
-task &lt;- &quot;fastEst&quot;
 dat &lt;- &quot;beh&quot;
-df &lt;- read_bids(projdat,sub,ses,task,dat)
-df</code></pre>
+save &lt;- TRUE
+
+# Define input parameters
+tasks &lt;- c(&quot;fastEst&quot;, &quot;fastTrl&quot;, &quot;psi&quot;, &quot;vas&quot;)
+
+# Initialize empty dataframe to store results
+df_avail &lt;- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALSE)
+
+# Loop over all tasks
+for (task in tasks) {
+  
+  # Import data for all participants and sessions
+  df_task &lt;- read_bids(projdir, sub, ses, task, dat, save)
+  
+  # Count number of available files for each participant and session
+  avail_counts &lt;- as.data.frame(table(df_task$sub, df_task$ses))
+  names(avail_counts) &lt;- c(&quot;sub&quot;, &quot;ses&quot;, task)
+  
+  # Merge with results dataframe
+  df_avail &lt;- merge(df_avail, avail_counts, all = TRUE)
+}
+
+# Replace NA values with 0
+df_avail[is.na(df_avail)] &lt;- 0
+
+# Print results
+print(df_avail)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NTQsIm5jb2wiOjYsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGYgWzU0IMOXIDZdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQTkxVzIwN2JRQkRkckM5cFRBTVU2QVg0aGtUTkJweFU0b0dIdHM5VlJTVWVXUktuamVyYWtlMXdlZU1EK3BGOENYUnR6d3pPMXBaSm9DOWQ2V2pPenM3TThZN1dYbi85ZU5wM1RoM0dtTUhNQm1lR3BTaXp2cDE4N2d3Wk03bWFOSmpKV3FtOVVrSGJpdGpLdHBWMXM4VWNIR0FBVElBRnNBRk53QXRBQytBQTFnQXZBVzNBT21BRHNBbDRCZGdDYkFOMkFLOEJid0J2QWU4QXU0QTl3SDZPaFkzYnZuZmgrVEVvN21NN2VrZ0VrajZTQXlTSFNGd2tBeVJESkIrQThONTdZajFpZ2xpZjJBR3hRMkl1c1FHeElUSFNFS1FoU0VPUWhpQU5RUnFDTkFScGlJSFdJbXZreXhnN1JIMmJ5RkVTUm9yZGFTZUcvMzgyYlFlL2h3N3drak9TUlJnWVVkcWo3SVM3eDcvVm0xY1lPUC9YZGxrOVBmNnArY3ZXZjI2OXgrYVhERHpiWTVpUFYwQlZYbDA5ZloxVjJGWHJGdmQzQlBPakZWQ1ZWK2ZYMTNYL3NuWEw2dVR2M2V5V0ZjZHhBUGI2eTdOWXFnczZmL25QS3Z4VmRjNXVTK2RVWDkrUEhsLzNuSFY2bUtmdHA2cGVuZTVqOHgvRzRoVVV5RjhlWGtFMk9JMTRmazVVcmVhME9aRng4aWxPaXRPVHlNZkFXVHhGZWlGalRhWVZoWmRkbEVyZkMzNlRQNHhiOFlWM3hqS1IzVW1rVWxqMmxWOG8xd3hueVRRTVZER2UvclpZV25JajBod2I4eUFWSDNkR1ArYkJ6NDVnK1c5VEF6clNCdTRXdUoxTG12aGdGbDQ5WHZCOUduallQbCtlZTlpQ2RiWEpiSS9kV1RRTnNFK084c2JkSkV3a3hqbWowRWRQZm9QZC9RSFRvUEFtVVFvQUFBPT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["sub"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["ses"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["fastEst"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["fastTrl"],"name":[4],"type":["int"],"align":["right"]},{"label":["psi"],"name":[5],"type":["int"],"align":["right"]},{"label":["vas"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"1","3":"903","4":"100","5":"60","6":"270"},{"1":"1","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"2","2":"1","3":"903","4":"100","5":"60","6":"240"},{"1":"2","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"3","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"3","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"4","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"4","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"5","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"5","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"6","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"6","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"7","2":"1","3":"903","4":"100","5":"60","6":"0"},{"1":"7","2":"2","3":"903","4":"100","5":"60","6":"270"},{"1":"8","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"8","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"9","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"9","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"10","2":"1","3":"903","4":"100","5":"60","6":"0"},{"1":"10","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"11","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"11","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"12","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"12","2":"2","3":"0","4":"100","5":"60","6":"0"},{"1":"13","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"13","2":"2","3":"903","4":"100","5":"60","6":"270"},{"1":"14","2":"1","3":"903","4":"100","5":"60","6":"270"},{"1":"14","2":"2","3":"903","4":"100","5":"0","6":"0"},{"1":"15","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"15","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"16","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"16","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"17","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"17","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"18","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"18","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"19","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"19","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"20","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"20","2":"2","3":"903","4":"100","5":"60","6":"270"},{"1":"21","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"21","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"22","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"22","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"23","2":"1","3":"903","4":"100","5":"60","6":"0"},{"1":"23","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"24","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"24","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"25","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"25","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"26","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"26","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"27","2":"1","3":"0","4":"100","5":"60","6":"0"},{"1":"27","2":"2","3":"0","4":"0","5":"0","6":"0"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[54]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuTkFcbmBgYCJ9 -->
+<pre class="r"><code>NA</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb2FkIHRoZSBmdW5jdGlvbiB0byByZWFkIEJJRFMgZGF0YVxuc291cmNlKGhlcmU6OmhlcmUoXCJjb2RlXCIsXCJyZWFkX2JpZHMuUlwiKSlcblxuIyBJbml0aWFsaXplIHBhcmFtZXRlcnNcbnByb2pkaXIgPC0gXCIvVXNlcnMvYXUzNDI5OTUvRG9jdW1lbnRzL01JTkRMQUIyMDIyX0NhbGlicmF0aW9uVEdJXCIgIyBVcGRhdGUgdGhpcyB0byB5b3VyIHByb2plY3QgZGlyZWN0b3J5XG5zdWIgPC0gMToyN1xuc2VzIDwtIDE6MlxuZGF0IDwtIFwiYmVoXCJcblxuIyBEZWZpbmUgdGFzayBuYW1lc1xudGFza3MgPC0gYyhcImZhc3RFc3RcIiwgXCJmYXN0VHJsXCIsIFwicHNpXCIsIFwidmFzXCIpXG5cbiMgSW5pdGlhbGl6ZSBlbXB0eSBkYXRhZnJhbWUgdG8gc3RvcmUgcmVzdWx0c1xuZGZfYXZhaWwgPC0gZGF0YS5mcmFtZShzdWIgPSBudW1lcmljKCksIHNlcyA9IG51bWVyaWMoKSwgc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFKVxuXG4jIExvb3Agb3ZlciBhbGwgdGFza3NcbmZvciAodGFzayBpbiB0YXNrcykge1xuICBcbiAgIyBDaGVjayBpZiBkYXRhIGZpbGVzIGV4aXN0XG4gIHRhc2tfZmlsZXMgPC0gZmlsZS5wYXRoKHByb2pkaXIsIFwiZGF0YVwiLCBwYXN0ZTAodGFzaywgXCIuY3N2XCIpKVxuICBcbiAgaWYgKGZpbGUuZXhpc3RzKHRhc2tfZmlsZXMpKSB7XG4gICAgZGZfdGFzayA8LSByZWFkLmNzdih0YXNrX2ZpbGVzLCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UpXG4gIH0gZWxzZSB7XG4gICAgc2F2ZSA8LSBUUlVFXG4gICAgZGZfdGFzayA8LSByZWFkX2JpZHMocHJvamRpciwgc3ViLCBzZXMsIHRhc2ssIGRhdCwgc2F2ZSlcbiAgICAjIFNhdmUgZGF0YSB0byBDU1YgZmlsZVxuICAgIGZpbGVuYW1lIDwtIHBhc3RlMCh0YXNrLCBcIi5jc3ZcIilcbiAgICB3cml0ZS5jc3YoZGZfdGFzaywgZmlsZSA9IGhlcmU6OmhlcmUoXCJkYXRhXCIsIGZpbGVuYW1lKSwgcm93Lm5hbWVzID0gRkFMU0UpXG4gIH1cbiAgXG4gICMgQ291bnQgbnVtYmVyIG9mIGF2YWlsYWJsZSBmaWxlcyBmb3IgZWFjaCBwYXJ0aWNpcGFudCBhbmQgc2Vzc2lvblxuICBhdmFpbF9jb3VudHMgPC0gYXMuZGF0YS5mcmFtZSh0YWJsZShkZl90YXNrJHN1YiwgZGZfdGFzayRzZXMpKVxuICBuYW1lcyhhdmFpbF9jb3VudHMpIDwtIGMoXCJzdWJcIiwgXCJzZXNcIiwgdGFzaylcbiAgXG4gICMgTWVyZ2Ugd2l0aCByZXN1bHRzIGRhdGFmcmFtZVxuICBkZl9hdmFpbCA8LSBtZXJnZShkZl9hdmFpbCwgYXZhaWxfY291bnRzLCBhbGwgPSBUUlVFKVxufVxuXG4jIFJlcGxhY2UgTkEgdmFsdWVzIHdpdGggMFxuZGZfYXZhaWxbaXMubmEoZGZfYXZhaWwpXSA8LSAwXG5cbiMgUHJpbnQgcmVzdWx0c1xucHJpbnQoZGZfYXZhaWwpXG5gYGAifQ== -->
+<pre class="r"><code># Load the function to read BIDS data
+source(here::here(&quot;code&quot;,&quot;read_bids.R&quot;))
+
+# Initialize parameters
+projdir &lt;- &quot;/Users/au342995/Documents/MINDLAB2022_CalibrationTGI&quot; # Update this to your project directory
+sub &lt;- 1:27
+ses &lt;- 1:2
+dat &lt;- &quot;beh&quot;
+
+# Define task names
+tasks &lt;- c(&quot;fastEst&quot;, &quot;fastTrl&quot;, &quot;psi&quot;, &quot;vas&quot;)
+
+# Initialize empty dataframe to store results
+df_avail &lt;- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALSE)
+
+# Loop over all tasks
+for (task in tasks) {
+  
+  # Check if data files exist
+  task_files &lt;- file.path(projdir, &quot;data&quot;, paste0(task, &quot;.csv&quot;))
+  
+  if (file.exists(task_files)) {
+    df_task &lt;- read.csv(task_files, stringsAsFactors = FALSE)
+  } else {
+    save &lt;- TRUE
+    df_task &lt;- read_bids(projdir, sub, ses, task, dat, save)
+    # Save data to CSV file
+    filename &lt;- paste0(task, &quot;.csv&quot;)
+    write.csv(df_task, file = here::here(&quot;data&quot;, filename), row.names = FALSE)
+  }
+  
+  # Count number of available files for each participant and session
+  avail_counts &lt;- as.data.frame(table(df_task$sub, df_task$ses))
+  names(avail_counts) &lt;- c(&quot;sub&quot;, &quot;ses&quot;, task)
+  
+  # Merge with results dataframe
+  df_avail &lt;- merge(df_avail, avail_counts, all = TRUE)
+}
+
+# Replace NA values with 0
+df_avail[is.na(df_avail)] &lt;- 0
+
+# Print results
+print(df_avail)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NTQsIm5jb2wiOjYsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGYgWzU0IMOXIDZdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQTkxVzIwN2JRQkRkckM5cFRBTVU2QVg0aGtUTkJweFU0b0dIdHM5VlJTVWVXUktuamVyYWtlMXdlZU1EK3BGOENYUnR6d3pPMXBaSm9DOWQ2V2pPenM3TThZN1dYbi85ZU5wM1RoM0dtTUhNQm1lR3BTaXp2cDE4N2d3Wk03bWFOSmpKV3FtOVVrSGJpdGpLdHBWMXM4VWNIR0FBVElBRnNBRk53QXRBQytBQTFnQXZBVzNBT21BRHNBbDRCZGdDYkFOMkFLOEJid0J2QWU4QXU0QTl3SDZPaFkzYnZuZmgrVEVvN21NN2VrZ0VrajZTQXlTSFNGd2tBeVJESkIrQThONTdZajFpZ2xpZjJBR3hRMkl1c1FHeElUSFNFS1FoU0VPUWhpQU5RUnFDTkFScGlJSFdJbXZreXhnN1JIMmJ5RkVTUm9yZGFTZUcvMzgyYlFlL2h3N3drak9TUlJnWVVkcWo3SVM3eDcvVm0xY1lPUC9YZGxrOVBmNnArY3ZXZjI2OXgrYVhERHpiWTVpUFYwQlZYbDA5ZloxVjJGWHJGdmQzQlBPakZWQ1ZWK2ZYMTNYL3NuWEw2dVR2M2V5V0ZjZHhBUGI2eTdOWXFnczZmL25QS3Z4VmRjNXVTK2RVWDkrUEhsLzNuSFY2bUtmdHA2cGVuZTVqOHgvRzRoVVV5RjhlWGtFMk9JMTRmazVVcmVhME9aRng4aWxPaXRPVHlNZkFXVHhGZWlGalRhWVZoWmRkbEVyZkMzNlRQNHhiOFlWM3hqS1IzVW1rVWxqMmxWOG8xd3hueVRRTVZER2UvclpZV25JajBod2I4eUFWSDNkR1ArYkJ6MDZQNWI5TkRlaElHN2hiNEhZdWFlS0RXWGoxZU1IM2FlQmgrM3g1N21FTDF0VW1zejEyWjlFMHdENDV5aHQza3pDUkdPZU1RaDg5K1ExMjl3ZTF4aEtEVVFvQUFBPT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["sub"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["ses"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["fastEst"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["fastTrl"],"name":[4],"type":["int"],"align":["right"]},{"label":["psi"],"name":[5],"type":["int"],"align":["right"]},{"label":["vas"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"1","3":"903","4":"100","5":"60","6":"270"},{"1":"1","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"2","2":"1","3":"903","4":"100","5":"60","6":"240"},{"1":"2","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"3","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"3","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"4","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"4","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"5","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"5","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"6","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"6","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"7","2":"1","3":"903","4":"100","5":"60","6":"0"},{"1":"7","2":"2","3":"903","4":"100","5":"60","6":"270"},{"1":"8","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"8","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"9","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"9","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"10","2":"1","3":"903","4":"100","5":"60","6":"0"},{"1":"10","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"11","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"11","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"12","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"12","2":"2","3":"0","4":"100","5":"60","6":"0"},{"1":"13","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"13","2":"2","3":"903","4":"100","5":"60","6":"270"},{"1":"14","2":"1","3":"903","4":"100","5":"60","6":"270"},{"1":"14","2":"2","3":"903","4":"100","5":"0","6":"0"},{"1":"15","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"15","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"16","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"16","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"17","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"17","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"18","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"18","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"19","2":"1","3":"903","4":"100","5":"60","6":"135"},{"1":"19","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"20","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"20","2":"2","3":"903","4":"100","5":"60","6":"270"},{"1":"21","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"21","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"22","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"22","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"23","2":"1","3":"903","4":"100","5":"60","6":"0"},{"1":"23","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"24","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"24","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"25","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"25","2":"2","3":"903","4":"100","5":"60","6":"405"},{"1":"26","2":"1","3":"903","4":"100","5":"60","6":"405"},{"1":"26","2":"2","3":"0","4":"0","5":"0","6":"0"},{"1":"27","2":"1","3":"0","4":"100","5":"60","6":"0"},{"1":"27","2":"2","3":"0","4":"0","5":"0","6":"0"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[54]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuTkFcbmBgYCJ9 -->
+<pre class="r"><code>NA</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="check-the-number-of-vas-ratings-for-each-participant" class="section level1">
+<h1>Check the number of VAS ratings for each participant</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShkcGx5cilcblxuZGZfc3VtbWFyeSA8LSBkZl9hdmFpbCAlPiVcbiAgZmlsdGVyKHNlcyAlaW4lIGMoMSwyKSkgJT4lXG4gIGdyb3VwX2J5KHNlcykgJT4lXG4gIHN1bW1hcml6ZSh0b3RhbCA9IGxlbmd0aCh1bmlxdWUoc3ViW3Nlcz09c2VzXSkpLFxuICAgICAgICAgICAgYWxsXzQwNSA9IHN1bSh2YXMgPT0gNDA1KSwgXG4gICAgICAgICAgICBub3RfYWxsID0gc3VtKHZhcyA8IDQwNSksXG4gICAgICAgICAgICBmcm9tMjAwX3RvNDA1ID0gc3VtKHZhcyA+IDIwMCAmIHZhcyA8IDQwNSksIFxuICAgICAgICAgICAgZnJvbTEwMF90bzIwMCA9IHN1bSh2YXMgPiAxMDAgJiB2YXMgPD0gMjAwKSwgXG4gICAgICAgICAgICBub25lID0gc3VtKHZhcyA9PSAwKSlcblxuZGZfc3VtbWFyeVxuYGBgIn0= -->
+<pre class="r"><code>library(dplyr)
+
+df_summary &lt;- df_avail %&gt;%
+  filter(ses %in% c(1,2)) %&gt;%
+  group_by(ses) %&gt;%
+  summarize(total = length(unique(sub[ses==ses])),
+            all_405 = sum(vas == 405), 
+            not_all = sum(vas &lt; 405),
+            from200_to405 = sum(vas &gt; 200 &amp; vas &lt; 405), 
+            from100_to200 = sum(vas &gt; 100 &amp; vas &lt;= 200), 
+            none = sum(vas == 0))
+
+df_summary</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6MiwibmNvbCI6Nywic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyIyIMOXIDciXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBMTFTMjA2RFFCQmRicEtTMXByMDBXK0FRTlhFRHpCK2dOR2tiMlNsaXhLM3V3MXMxVWUvSEJ5V21SWjRHR2JPbWZzc0wwKzd1MmdYTWNZODVqc3U4d0l3V2ZEMitody9NdWE3QUJ6bXMwV3ZmeUZvQTBZSWVnVjZjRm85Q2J5UzRsdklCcXdiNjhYMGpJenRMRDRvSkc4by9GeWs1SVhSTlZndENMVzdSU0c4QmxtTzhCSTV3aDRLWWJ2ZENQdER6blFjeFErQ3hnbVI5QnFnMEcrMDRSSkJ5S1hNNzlNSGdrcWJIQ2lFcTdMV2gyMmE1a1pmWWl5WldSSmNTUHBLS3pFYlpGSHJuNFNHc1JQL3dhZnJ1bllJOUxyWnphSTlOendwYTBnWjdqWXBGK3FqcWJTQ1l1NEdUekZPZHVvWnNUNnB2dmsrTGo1UDZpdk8rZ2I0NG5SQ2ZQMnpIUTR0ZlJvc29NY1U2cU9DL2ZDQWtyOExPdEUxTEdsM1RJNTFwUXh0QW15VGpBOGRGVm9TTS93VDdUOW55TWtpdkFJQUFBPT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["ses"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["total"],"name":[2],"type":["int"],"align":["right"]},{"label":["all_405"],"name":[3],"type":["int"],"align":["right"]},{"label":["not_all"],"name":[4],"type":["int"],"align":["right"]},{"label":["from200_to405"],"name":[5],"type":["int"],"align":["right"]},{"label":["from100_to200"],"name":[6],"type":["int"],"align":["right"]},{"label":["none"],"name":[7],"type":["int"],"align":["right"]}],"data":[{"1":"1","2":"27","3":"15","4":"12","5":"3","6":"5","7":"4"},{"1":"2","2":"27","3":"12","4":"15","5":"3","6":"0","7":"12"}],"options":{"columns":{"min":{},"max":[10],"total":[7]},"rows":{"min":[10],"max":[10],"total":[2]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuTkFcbmBgYCJ9 -->
+<pre class="r"><code>NA</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyBMb2FkIHJlcXVpcmVkIHBhY2thZ2VzIApgYGB7ciB3YXJuaW5nPUZBTFNFfQojaW5zdGFsbC5wYWNrYWdlcygic3RyaW5nciIpCmluc3RhbGwucGFja2FnZXMoIm9zZnIiKQoKYGBgCgojIExvYWQgZGF0YQpgYGB7cn0KYXBpX3Rva2VuID0gInFMQWh3SHlWY2pqRTdJNU40SENBUE9HUnZCOE4wMHZhNHFCS3dLN0VFdXREOURvT3lEclJ0a3phb1lRYnIyZWhCdWJoVVEiCnByb2plY3RfaWQgPC0gInU0M2t0IgoKbGlicmFyeShvc2ZyKQpvc2ZfYXV0aCh0b2tlbiA9IGFwaV90b2tlbikKcHJvamVjdF9pZCA8LSAidTQza3QiCmZpbGVzIDwtIG9zZl9sc19maWxlcyhwcm9qZWN0X2lkKQpgYGAKCgpgYGB7cn0Kc291cmNlKCJyZWFkX2JpZHMuUiIpCnByb2ogPC0gIi9tbnQvZmFzdF9zY3JhdGNoL2JwcC90Z2ktY2FsaWJyYXRpb24tZXhwMSIKcHJvamRpciA8LSBmaWxlLnBhdGgocHJvamRpciwgImRhdGEiKQpzdWIgPC0gMToyNwpzZXMgPC0gMToyCnRhc2sgPC0gImZhc3RFc3QiCmRhdCA8LSAiYmVoIgpkZiA8LSByZWFkX2JpZHMocHJvamRhdCxzdWIsc2VzLHRhc2ssZGF0KQpkZgpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyBMb2FkIHJlcXVpcmVkIHBhY2thZ2VzIApgYGB7ciB3YXJuaW5nPUZBTFNFfQpsaWJyYXJ5KCJzdHJpbmdyIikKbGlicmFyeSgicmVhZHIiKQoKYGBgCiMgVGVtcG9yYXJ5IHNvbHV0aW9uCgpgYGB7cn0Kc291cmNlKGhlcmU6OmhlcmUoImNvZGUiLCJyZWFkX2JpZHMuUiIpKQoKIyBJbml0aWFsaXplIHBhcmFtZXRlcnMKcHJvamRpciA8LSAiL1VzZXJzL2F1MzQyOTk1L0RvY3VtZW50cy9NSU5ETEFCMjAyMl9DYWxpYnJhdGlvblRHSSIgIyMjIFRPIFVQREFURQpzdWIgPC0gMToyNwpzZXMgPC0gMToyCmRhdCA8LSAiYmVoIgpzYXZlIDwtIFRSVUUKCiMgRGVmaW5lIGlucHV0IHBhcmFtZXRlcnMKdGFza3MgPC0gYygiZmFzdEVzdCIsICJmYXN0VHJsIiwgInBzaSIsICJ2YXMiKQoKIyBJbml0aWFsaXplIGVtcHR5IGRhdGFmcmFtZSB0byBzdG9yZSByZXN1bHRzCmRmX2F2YWlsIDwtIGRhdGEuZnJhbWUoc3ViID0gbnVtZXJpYygpLCBzZXMgPSBudW1lcmljKCksIHN0cmluZ3NBc0ZhY3RvcnMgPSBGQUxTRSkKCiMgTG9vcCBvdmVyIGFsbCB0YXNrcwpmb3IgKHRhc2sgaW4gdGFza3MpIHsKICAKICAjIEltcG9ydCBkYXRhIGZvciBhbGwgcGFydGljaXBhbnRzIGFuZCBzZXNzaW9ucwogIGRmX3Rhc2sgPC0gcmVhZF9iaWRzKHByb2pkaXIsIHN1Yiwgc2VzLCB0YXNrLCBkYXQsIHNhdmUpCiAgCiAgIyBDb3VudCBudW1iZXIgb2YgYXZhaWxhYmxlIGZpbGVzIGZvciBlYWNoIHBhcnRpY2lwYW50IGFuZCBzZXNzaW9uCiAgYXZhaWxfY291bnRzIDwtIGFzLmRhdGEuZnJhbWUodGFibGUoZGZfdGFzayRzdWIsIGRmX3Rhc2skc2VzKSkKICBuYW1lcyhhdmFpbF9jb3VudHMpIDwtIGMoInN1YiIsICJzZXMiLCB0YXNrKQogIAogICMgTWVyZ2Ugd2l0aCByZXN1bHRzIGRhdGFmcmFtZQogIGRmX2F2YWlsIDwtIG1lcmdlKGRmX2F2YWlsLCBhdmFpbF9jb3VudHMsIGFsbCA9IFRSVUUpCn0KCiMgUmVwbGFjZSBOQSB2YWx1ZXMgd2l0aCAwCmRmX2F2YWlsW2lzLm5hKGRmX2F2YWlsKV0gPC0gMAoKIyBQcmludCByZXN1bHRzCnByaW50KGRmX2F2YWlsKQoKYGBgCgpgYGB7cn0KIyBMb2FkIHRoZSBmdW5jdGlvbiB0byByZWFkIEJJRFMgZGF0YQpzb3VyY2UoaGVyZTo6aGVyZSgiY29kZSIsInJlYWRfYmlkcy5SIikpCgojIEluaXRpYWxpemUgcGFyYW1ldGVycwpwcm9qZGlyIDwtICIvVXNlcnMvYXUzNDI5OTUvRG9jdW1lbnRzL01JTkRMQUIyMDIyX0NhbGlicmF0aW9uVEdJIiAjIFVwZGF0ZSB0aGlzIHRvIHlvdXIgcHJvamVjdCBkaXJlY3RvcnkKc3ViIDwtIDE6MjcKc2VzIDwtIDE6MgpkYXQgPC0gImJlaCIKCiMgRGVmaW5lIHRhc2sgbmFtZXMKdGFza3MgPC0gYygiZmFzdEVzdCIsICJmYXN0VHJsIiwgInBzaSIsICJ2YXMiKQoKIyBJbml0aWFsaXplIGVtcHR5IGRhdGFmcmFtZSB0byBzdG9yZSByZXN1bHRzCmRmX2F2YWlsIDwtIGRhdGEuZnJhbWUoc3ViID0gbnVtZXJpYygpLCBzZXMgPSBudW1lcmljKCksIHN0cmluZ3NBc0ZhY3RvcnMgPSBGQUxTRSkKCiMgTG9vcCBvdmVyIGFsbCB0YXNrcwpmb3IgKHRhc2sgaW4gdGFza3MpIHsKICAKICAjIENoZWNrIGlmIGRhdGEgZmlsZXMgZXhpc3QKICB0YXNrX2ZpbGVzIDwtIGZpbGUucGF0aChwcm9qZGlyLCAiZGF0YSIsIHBhc3RlMCh0YXNrLCAiLmNzdiIpKQogIAogIGlmIChmaWxlLmV4aXN0cyh0YXNrX2ZpbGVzKSkgewogICAgZGZfdGFzayA8LSByZWFkLmNzdih0YXNrX2ZpbGVzLCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UpCiAgfSBlbHNlIHsKICAgIHNhdmUgPC0gVFJVRQogICAgZGZfdGFzayA8LSByZWFkX2JpZHMocHJvamRpciwgc3ViLCBzZXMsIHRhc2ssIGRhdCwgc2F2ZSkKICAgICMgU2F2ZSBkYXRhIHRvIENTViBmaWxlCiAgICBmaWxlbmFtZSA8LSBwYXN0ZTAodGFzaywgIi5jc3YiKQogICAgd3JpdGUuY3N2KGRmX3Rhc2ssIGZpbGUgPSBoZXJlOjpoZXJlKCJkYXRhIiwgZmlsZW5hbWUpLCByb3cubmFtZXMgPSBGQUxTRSkKICB9CiAgCiAgIyBDb3VudCBudW1iZXIgb2YgYXZhaWxhYmxlIGZpbGVzIGZvciBlYWNoIHBhcnRpY2lwYW50IGFuZCBzZXNzaW9uCiAgYXZhaWxfY291bnRzIDwtIGFzLmRhdGEuZnJhbWUodGFibGUoZGZfdGFzayRzdWIsIGRmX3Rhc2skc2VzKSkKICBuYW1lcyhhdmFpbF9jb3VudHMpIDwtIGMoInN1YiIsICJzZXMiLCB0YXNrKQogIAogICMgTWVyZ2Ugd2l0aCByZXN1bHRzIGRhdGFmcmFtZQogIGRmX2F2YWlsIDwtIG1lcmdlKGRmX2F2YWlsLCBhdmFpbF9jb3VudHMsIGFsbCA9IFRSVUUpCn0KCiMgUmVwbGFjZSBOQSB2YWx1ZXMgd2l0aCAwCmRmX2F2YWlsW2lzLm5hKGRmX2F2YWlsKV0gPC0gMAoKIyBQcmludCByZXN1bHRzCnByaW50KGRmX2F2YWlsKQoKYGBgCgojIENoZWNrIHRoZSBudW1iZXIgb2YgVkFTIHJhdGluZ3MgZm9yIGVhY2ggcGFydGljaXBhbnQKYGBge3J9CmxpYnJhcnkoZHBseXIpCgpkZl9zdW1tYXJ5IDwtIGRmX2F2YWlsICU+JQogIGZpbHRlcihzZXMgJWluJSBjKDEsMikpICU+JQogIGdyb3VwX2J5KHNlcykgJT4lCiAgc3VtbWFyaXplKHRvdGFsID0gbGVuZ3RoKHVuaXF1ZShzdWJbc2VzPT1zZXNdKSksCiAgICAgICAgICAgIGFsbF80MDUgPSBzdW0odmFzID09IDQwNSksIAogICAgICAgICAgICBub3RfYWxsID0gc3VtKHZhcyA8IDQwNSksCiAgICAgICAgICAgIGZyb20yMDBfdG80MDUgPSBzdW0odmFzID4gMjAwICYgdmFzIDwgNDA1KSwgCiAgICAgICAgICAgIGZyb20xMDBfdG8yMDAgPSBzdW0odmFzID4gMTAwICYgdmFzIDw9IDIwMCksIAogICAgICAgICAgICBub25lID0gc3VtKHZhcyA9PSAwKSkKCmRmX3N1bW1hcnkKCmBgYAoK</div>
 
 
 

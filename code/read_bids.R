@@ -1,35 +1,31 @@
-read_bids <- function(projdir,sub,ses,task,dat) {
+read_bids <- function(projdir, sub, ses, task, dat, save) {
   
-  library("stringr")
-  
+  # Create all possible combinations of subject, session, and data
+  combinations <- expand.grid(sub = sub, ses = ses, dat = dat)
+
   # Generate comprehensive list of file names
-  filenames_list <- c()
-  for (i in sub){
-    sub_folder <- paste0('sub-', str_pad(i, 4, pad = "0"))
-    for (j in ses){
-      ses_folder <- paste0('ses-', str_pad(j, 2, pad = "0"))
-      for (k in length(dat)){
-        task_folder <- paste0('task-', task)
-        dat_folder <- dat[k]
-        filepath <- file.path(projdir, sub_folder, ses_folder, dat_folder)
-        filenames <- file.path(filepath,paste0(sub_folder, '_', ses_folder, '_', task_folder, '_', dat_folder, '.tsv'))
-        filenames_list <- append(filenames_list, filenames)
-      }
-    }
-  }
+  # filenames_list <- paste0(projdir, "/sub-", sprintf("%04d", combinations$sub), "/ses-", sprintf("%02d", combinations$ses), "/beh/sub-", sprintf("%04d", combinations$sub), "_ses-", sprintf("%02d", combinations$ses), "_task-", task, "_run-", combinations$dat, ".tsv")
+  filenames_list <- paste0(projdir, "/sub-", sprintf("%04d", combinations$sub), "/ses-", sprintf("%02d", combinations$ses), "/beh/sub-", sprintf("%04d", combinations$sub), "_ses-", sprintf("%02d", combinations$ses), "_task-", task, "_", combinations$dat, ".tsv")
   
   # Check which file names exist
-  existing_files <- c()
-  for (f in 1:length(filenames_list)) existing_files <- c(existing_files, file.exists(filenames_list[f]))
-  existing_files
+  existing_files <- sapply(filenames_list, function(f) file.exists(f) && grepl("\\.tsv$", f))
   
   # Import data from existing files
-  df <- data.frame()
-  for (f in 1:length(filenames_list)) if (existing_files[f] == TRUE) df <- rbind(df, read_tsv(filenames_list[f]))
+  df <- do.call(rbind, lapply(filenames_list[existing_files], read_delim, delim = "\t", show_col_types = FALSE))
   
   # Define factors
-  df$sub_n <- as.factor(df$sub_n)
-  df$ses_n <- as.factor(df$ses_n)
+  #df$sub <- factor(combinations$sub[existing_files])
+  #df$ses <- factor(combinations$ses[existing_files])
+  
+  # Define factors
+  df$sub <- as.factor(df$sub)
+  df$ses <- as.factor(df$ses)
+  
+  # Save data if requested
+  if (save) {
+    filename <- paste0(task, ".csv")
+    write.csv(df, file = here::here("data", filename), row.names = FALSE)
+  }
   
   return(df)
 }

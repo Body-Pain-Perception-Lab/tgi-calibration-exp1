@@ -5,32 +5,113 @@ output: html_notebook
 
 # Load required packages 
 ```{r warning=FALSE}
-#install.packages("stringr")
-install.packages("osfr")
+library("stringr")
+library("readr")
 
 ```
-
-# Load data
-```{r}
-api_token = "qLAhwHyVcjjE7I5N4HCAPOGRvB8N00va4qBKwK7EEutD9DoOyDrRtkzaoYQbr2ehBubhUQ"
-project_id <- "u43kt"
-
-library(osfr)
-osf_auth(token = api_token)
-project_id <- "u43kt"
-files <- osf_ls_files(project_id)
-```
-
+# Temporary solution
 
 ```{r}
-source("read_bids.R")
-proj <- "/mnt/fast_scratch/bpp/tgi-calibration-exp1"
-projdir <- file.path(projdir, "data")
+source(here::here("code","read_bids.R"))
+
+# Initialize parameters
+projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" ### TO UPDATE
 sub <- 1:27
 ses <- 1:2
-task <- "fastEst"
 dat <- "beh"
-df <- read_bids(projdat,sub,ses,task,dat)
-df
+save <- TRUE
+
+# Define input parameters
+tasks <- c("fastEst", "fastTrl", "psi", "vas")
+
+# Initialize empty dataframe to store results
+df_avail <- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALSE)
+
+# Loop over all tasks
+for (task in tasks) {
+  
+  # Import data for all participants and sessions
+  df_task <- read_bids(projdir, sub, ses, task, dat, save)
+  
+  # Count number of available files for each participant and session
+  avail_counts <- as.data.frame(table(df_task$sub, df_task$ses))
+  names(avail_counts) <- c("sub", "ses", task)
+  
+  # Merge with results dataframe
+  df_avail <- merge(df_avail, avail_counts, all = TRUE)
+}
+
+# Replace NA values with 0
+df_avail[is.na(df_avail)] <- 0
+
+# Print results
+print(df_avail)
+
+```
+
+```{r}
+# Load the function to read BIDS data
+source(here::here("code","read_bids.R"))
+
+# Initialize parameters
+projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" # Update this to your project directory
+sub <- 1:27
+ses <- 1:2
+dat <- "beh"
+
+# Define task names
+tasks <- c("fastEst", "fastTrl", "psi", "vas")
+
+# Initialize empty dataframe to store results
+df_avail <- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALSE)
+
+# Loop over all tasks
+for (task in tasks) {
+  
+  # Check if data files exist
+  task_files <- file.path(projdir, "data", paste0(task, ".csv"))
+  
+  if (file.exists(task_files)) {
+    df_task <- read.csv(task_files, stringsAsFactors = FALSE)
+  } else {
+    save <- TRUE
+    df_task <- read_bids(projdir, sub, ses, task, dat, save)
+    # Save data to CSV file
+    filename <- paste0(task, ".csv")
+    write.csv(df_task, file = here::here("data", filename), row.names = FALSE)
+  }
+  
+  # Count number of available files for each participant and session
+  avail_counts <- as.data.frame(table(df_task$sub, df_task$ses))
+  names(avail_counts) <- c("sub", "ses", task)
+  
+  # Merge with results dataframe
+  df_avail <- merge(df_avail, avail_counts, all = TRUE)
+}
+
+# Replace NA values with 0
+df_avail[is.na(df_avail)] <- 0
+
+# Print results
+print(df_avail)
+
+```
+
+# Check the number of VAS ratings for each participant
+```{r}
+library(dplyr)
+
+df_summary <- df_avail %>%
+  filter(ses %in% c(1,2)) %>%
+  group_by(ses) %>%
+  summarize(total = length(unique(sub[ses==ses])),
+            all_405 = sum(vas == 405), 
+            not_all = sum(vas < 405),
+            from200_to405 = sum(vas > 200 & vas < 405), 
+            from100_to200 = sum(vas > 100 & vas <= 200), 
+            none = sum(vas == 0))
+
+df_summary
+
 ```
 
