@@ -14,18 +14,53 @@ library(ggpubr)
 ```
 # Load data
 ```{r}
-
 source(here::here("code","read_bids.R"))
 
-# Initialize parameters
-projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" ### TO UPDATE
-sub <- 1:27
-ses <- 1:2
-dat <- "beh"
-save <- TRUE
+# Define tasks and their corresponding filenames
+tasks <- c("vas", "fastEst", "fastTrl", "psi")
+filenames <- c("vas.csv", "fastEst.csv", "fastTrl.csv", "psi.csv")
 
-# Define input parameters
-tasks <- c("fastEst", "fastTrl", "psi", "vas")
+# Define how to load the data: from the "data" folder in GitHub or from an external folder (eg., local folder) using read_bids.R
+data_option <- "github" # or "read_bids"
+
+# Parameters for the read_bids option
+if (data_option == "read_bids") {
+  projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" # TO UPDATE
+  sub <- 1:27     # TO UPDATE
+  ses <- 1:2
+  dat <- "beh"
+  save <- TRUE
+}
+
+# Initialize an empty list to store the data
+data_list <- list()
+
+# Loop through tasks and filenames
+for (i in seq_along(tasks)) {
+  task <- tasks[i]
+  filename <- filenames[i]
+  
+  if (data_option == "github") {
+    # Read data from the data folder in GitHub
+    data_list[[task]] <- read.csv(here::here("data", filename), header = TRUE)
+  } else if (data_option == "read_bids") {
+    data_list[[task]] <- read_bids(projdir, sub, ses, task, dat, save)
+  } else {
+    stop("Invalid data_option. Please set data_option to either 'github' or 'read_bids'.")
+  }
+}
+
+# Extract the individual data frames from the list
+vas <- data_list[["vas"]]
+fe <- data_list[["fastEst"]]
+ft <- data_list[["fastTrl"]]
+psi <- data_list[["psi"]]
+```
+
+# Check data availability
+```{r}
+# Define the tasks of interest
+tasks <- c("vas", "fastEst", "fastTrl", "psi")
 
 # Initialize empty dataframe to store results
 df_avail <- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALSE)
@@ -34,7 +69,7 @@ df_avail <- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALS
 for (task in tasks) {
   
   # Import data for all participants and sessions
-  df_task <- read_bids(projdir, sub, ses, task, dat, save)
+  df_task <- data_list[[task]]
   
   # Count number of available files for each participant and session
   avail_counts <- as.data.frame(table(df_task$sub, df_task$ses))
@@ -71,9 +106,6 @@ df_summary
 ```
 # VAS: summary 
 ```{r}
-# Load vas data
-vas <- read.csv(here::here("data", "vas.csv"), header = TRUE)
-
 # Calculate median of VAS ratings and VAS response times
 vas_temps <- vas %>%
   group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%
@@ -89,10 +121,6 @@ df_vas
 # Thresholds: summary
 Define threshold function data and restrict data to TGI range (i.e., all data points below CPT and above HPT are defined as NA)
 ```{r warning=FALSE}
-# Load fast and psi threshold data
-fe <- read.csv(here::here("data", "fastEst.csv"), header = TRUE)
-psi <- read.csv(here::here("data", "psi.csv"), header = TRUE)
-
 sublist <- unique(fe$sub)
 seslist <- c(1,2)
 
