@@ -147,9 +147,9 @@ df_fe
 
 ```
 
-# Plot data for each participant
+# Plot threshold and vas data for each participant
 ```{r warning=FALSE}
-source(here::here('code','plotFast_v1.R'))
+source(here::here('code','plot_thresholds_v1.R'))
 
 sublist <- unique(fe$sub)
 
@@ -169,7 +169,7 @@ walk(sublist, function(sub_n) {
     title <- paste(paste('Session', seslist), sep = " ")
 
     # Plot the session
-    plots[[seslist]] <- plotFast_v1(vas_sub, fe_sub, psi_sub, title)
+    plots[[seslist]] <- plot_thresholds_v1(vas_sub, fe_sub, psi_sub, title)
   }
   
   # Generate figure combining plots for session 1 and session 2

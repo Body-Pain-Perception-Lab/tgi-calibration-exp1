@@ -1,4 +1,4 @@
-plotFast_v1 <- function(vas_sub, fe_sub, psi_sub, title) {
+plot_thresholds_v1 <- function(vas_sub, fe_sub, psi_sub, title) {
   
   # Define colors
   reds6 <- brewer.pal(6, "Reds")
