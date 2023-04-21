@@ -28,5 +28,6 @@ vignettes/*.pdf
 .Renviron
 # Mac
 .DS_Store
+# Files with personal info
 osf_token.txt
 data_import.Rmd
