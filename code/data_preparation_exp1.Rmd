@@ -7,6 +7,9 @@ output: html_notebook
 ```{r warning=FALSE}
 library("stringr")
 library("readr")
+library(tidyverse)
+library(RColorBrewer)
+library(ggpubr)
 
 ```
 # Temporary solution
@@ -49,55 +52,7 @@ print(df_avail)
 
 ```
 
-```{r}
-# Load the function to read BIDS data
-source(here::here("code","read_bids.R"))
-
-# Initialize parameters
-projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" # Update this to your project directory
-sub <- 1:27
-ses <- 1:2
-dat <- "beh"
-
-# Define task names
-tasks <- c("fastEst", "fastTrl", "psi", "vas")
-
-# Initialize empty dataframe to store results
-df_avail <- data.frame(sub = numeric(), ses = numeric(), stringsAsFactors = FALSE)
-
-# Loop over all tasks
-for (task in tasks) {
-  
-  # Check if data files exist
-  task_files <- file.path(projdir, "data", paste0(task, ".csv"))
-  
-  if (file.exists(task_files)) {
-    df_task <- read.csv(task_files, stringsAsFactors = FALSE)
-  } else {
-    save <- TRUE
-    df_task <- read_bids(projdir, sub, ses, task, dat, save)
-    # Save data to CSV file
-    filename <- paste0(task, ".csv")
-    write.csv(df_task, file = here::here("data", filename), row.names = FALSE)
-  }
-  
-  # Count number of available files for each participant and session
-  avail_counts <- as.data.frame(table(df_task$sub, df_task$ses))
-  names(avail_counts) <- c("sub", "ses", task)
-  
-  # Merge with results dataframe
-  df_avail <- merge(df_avail, avail_counts, all = TRUE)
-}
-
-# Replace NA values with 0
-df_avail[is.na(df_avail)] <- 0
-
-# Print results
-print(df_avail)
-
-```
-
-# Check the number of VAS ratings for each participant
+# VAS: Check the number of trials
 ```{r}
 library(dplyr)
 
@@ -113,5 +68,57 @@ df_summary <- df_avail %>%
 
 df_summary
 
+```
+# VAS: summary 
+```{r}
+# Load vas data
+vas <- read.csv(here::here("data", "vas.csv"), header = TRUE)
+
+# Calculate median of VAS ratings and VAS response times
+vas_temps <- vas %>%
+  group_by(sub, threshold, gain, stim_type, vas_type) %>%
+  summarize(temp_cold = mean(target_cold_t1), temp_warm = mean(target_warm_t1))
+
+vas_ratings <- vas %>%
+  group_by(sub, threshold, gain, stim_type, vas_type) %>%
+  summarize(vas_rating_median = median(vas_rating), vas_rt_median = median(vas_rt))
+
+df_vas <- inner_join(vas_temps, vas_ratings, by = c('sub', 'threshold', 'gain', 'stim_type', 'vas_type'))
+df_vas
+```
+# Thresholds: summary
+Define threshold function data and restrict data to TGI range (i.e., all data points below CPT and above HPT are defined as NA)
+```{r}
+# Load fast and psi threshold data
+fe <- read.csv(here::here("data", "fastEst.csv"), header = TRUE)
+psi <- read.csv(here::here("data", "psi.csv"), header = TRUE)
+
+sublist <- unique(fe$sub)
+seslist <- c(1,2)
+
+fe_df <- crossing(sublist, seslist) %>%
+  pmap_dfr(function(sub, ses) {
+    psi_sub <- psi %>% filter(sub == sub & ses == ses) # define CPT and HPT for one participant
+    cpt <- psi_sub %>% filter(quality == 'cold')
+    hpt <- psi_sub %>% filter(quality == 'warm')
+    fe_sub <- fastEst %>% filter(sub == sub & ses == ses) # define data for each subject
+    fe_sub$temp_cold_na <- fe_sub$temp_cold # copy temp cold_column
+    fe_sub$temp_cold_na[fe_sub$temp_cold < cpt$threshold | fe_sub$temp_warm > hpt$threshold] <- NA # remove data below CPT and above HPT
+    fe_sub
+  })
+fe_df
+
+```
+# Plot data for each participant
+```{r}
+source(here::here('code','figs','plotFast_v1.R'))
+sublist <- 1:27
+
+walk(sublist, function(sub) {
+  p1 <- plotFast_v1(sub, 1)
+  p2 <- plotFast_v1(sub, 2)
+  filename <- file.path(projdir, 'code', 'figs', paste0('sub-', str_pad(sub, 4, pad = '0'), '.pdf'))
+  g1 <- ggarrange(p1, p2, labels = c('A', 'B'))
+  ggsave(g1, file = filename, width = 
 ```
 

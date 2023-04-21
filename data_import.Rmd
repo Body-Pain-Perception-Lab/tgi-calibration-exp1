@@ -1,0 +1,124 @@
+---
+title: "import_data"
+author: "Francesca Fardo"
+date: "2023-04-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("httr")
+#install.packages("jsonlite")
+library(httr)
+library(jsonlite)
+token <- "0nflgRISpcoGzcabAFVq45E0E41sJIDInT9Kn5xzABARKeljq5KBPTRmK97Pk6KqkOfJCp"
+```
+
+# Working
+
+```{r}
+library(httr)
+library(jsonlite)
+
+project_id <- "eq2fm"
+url <- paste0("https://api.osf.io/v2/nodes/", project_id, "/files/")
+response <- GET(url, add_headers(Authorization = paste("Bearer", token))) 
+if (grepl("OK", http_status(response)$message)) {
+  content <- content(response, "text", encoding = "UTF-8")
+  json_content <- fromJSON(content)
+  
+  print(json_content)
+  str(json_content)
+} else {
+  cat("Error:", http_status(response)$message, "\n")
+}
+
+```
+
+```{r}
+library(httr)
+library(jsonlite)
+
+project_id <- "eq2fm"
+url <- paste0("https://api.osf.io/v2/nodes/", project_id, "/files/")
+response <- GET(url, add_headers(Authorization = paste("Bearer", token))) 
+
+if (grepl("OK", http_status(response)$message)) {
+  providers_content <- fromJSON(content(response, "text"), flatten = TRUE)
+  
+  # Filter the list of providers to get the osfstorage provider
+  osfstorage_link <- providers_content$data$links.related[providers_content$data$attributes.provider == "osfstorage"]
+  
+  if (!is.null(osfstorage_link)) {
+    # Get the list of files in the osfstorage provider
+    files_response <- GET(osfstorage_link, add_headers(Authorization = paste("Bearer", token)))
+    
+    if (grepl("OK", http_status(files_response)$message)) {
+      files_content <- fromJSON(content(files_response, "text"), flatten = TRUE)
+      
+      # Filter the list of files to get the file you need
+      file <- files_content$data[files_content$data$attributes.name == "test.csv", ]
+      
+      if (nrow(file) > 0) {
+        # Get the file content
+        file_response <- GET(file$links.self.href, add_headers(Authorization = paste("Bearer", token)))
+        
+        if (grepl("OK", http_status(file_response)$message)) {
+          content <- content(file_response, "text", encoding = "UTF-8")
+          data <- read.csv2(textConnection(content), header=TRUE, na.strings="NA")
+          print(data)
+        } else {
+          cat("Error:", http_status(file_response)$message, "\n")
+        }
+      } else {
+        cat("File not found\n")
+      }
+    } else {
+      cat("Error:", http_status(files_response)$message, "\n")
+    }
+  } else {
+    cat("No osfstorage provider found for the project.\n")
+  }
+} else {
+  cat("Error:", http_status(response)$message, "\n")
+}
+
+```
+
+```{r}
+# url <- "https://osf.io/download/63kue/"
+# filename <- "test.csv"
+# download.file(url, destfile = filename)
+# data <- read.csv2(filename, header = TRUE, na.strings = "NA")
+
+data <- read.csv2("https://osf.io/63kue/download", header=TRUE, na.strings="NA")
+data
+```
+```{r}
+library(httr)
+
+# Set the project ID and file name
+project_id <- "eq2fm"
+file_name <- "test.csv"
+
+# Set the OSF API URL for the project
+api_url <- paste0("https://api.osf.io/v2/nodes/", project_id, "/files/osfstorage/", file_name)
+
+# Set the OSF API headers with the access token
+osf_headers <- add_headers(Authorization = paste("Bearer", token))
+
+# GET the data from the OSF API
+response <- GET(api_url, osf_headers)
+
+# Read the data into a data frame
+if (grepl("OK", http_status(response)$message)) {
+  data <- read.csv2(rawToChar(content(response, "raw")), header = TRUE, na.strings = "NA")
+  print(data)
+} else {
+  cat("Error:", http_status(response)$message, "\n")
+}
+
+data
+```
+
