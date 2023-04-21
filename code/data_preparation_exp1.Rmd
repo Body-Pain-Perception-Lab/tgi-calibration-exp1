@@ -96,9 +96,17 @@ psi <- read.csv(here::here("data", "psi.csv"), header = TRUE)
 sublist <- unique(fe$sub)
 seslist <- c(1,2)
 
+# Psi thresholds: Select the last row with non-NA data
+df_psi <- psi %>%
+  group_by(sub, ses, quality) %>%
+  filter((quality == "warm" & !is.na(threshold)) | (quality == "cold" & !is.na(threshold))) %>%
+  slice(n())
+df_psi
+
+# Fast thresholds
 df_fe <- crossing(sublist, seslist) %>%
   pmap_dfr(function(sublist, seslist) {
-    psi_sub <- psi %>% filter(sub == sublist & ses == seslist) # define CPT and HPT for one participant
+    psi_sub <- df_psi %>% filter(sub == sublist & ses == seslist) # define CPT and HPT for one participant
     cpt <- psi_sub %>% filter(quality == 'cold')
     hpt <- psi_sub %>% filter(quality == 'warm')
     fe_sub <- fe %>% filter(sub == sublist & ses == seslist) # define data for each subject
@@ -108,47 +116,41 @@ df_fe <- crossing(sublist, seslist) %>%
   })
 df_fe
 
-# Select the last row with non-NA data
-df_psi <- psi %>%
-  group_by(sub, ses, quality) %>%
-  filter((quality == "warm" & !is.na(threshold)) | (quality == "cold" & !is.na(threshold))) %>%
-  slice(n())
-df_psi
-```
 
-```{r}
-df_psi <-
-  
 ```
 
 # Plot data for each participant
-```{r}
+```{r warning=FALSE}
 source(here::here('code','plotFast_v1.R'))
-sublist <- 1#unique(fe$sub)
 
-walk(sublist, function(sub) {
+sublist <- unique(fe$sub)
+
+walk(sublist, function(sub_n) {
   plots <- list()
-        
+     
+  substr <- paste0('sub-', str_pad(sub_n, 4, pad = '0'))
+    
   # Filter data to plot        
   for (seslist in 1:2) {
     # Filter data for a specific participant and session
-    vas_sub <- df_vas %>% filter(sub == sublist & ses == seslist)
-    fe_sub <- df_fe %>% filter(sub == sublist & ses == seslist)
-    psi_sub <- df_psi %>% filter(sub == sublist & ses == seslist)
+    vas_sub <- df_vas %>% filter(sub == sub_n & ses == seslist)
+    fe_sub <- df_fe %>% filter(sub == sub_n & ses == seslist)
+    psi_sub <- df_psi %>% filter(sub == sub_n & ses == seslist)
     
     # Set title for the session
-    title <- paste('fast TGI', paste('Subject', sublist), paste('Session', seslist), sep = " ")
+    title <- paste(paste('Session', seslist), sep = " ")
 
     # Plot the session
     plots[[seslist]] <- plotFast_v1(vas_sub, fe_sub, psi_sub, title)
   }
   
   # Generate figure combining plots for session 1 and session 2
-  g1 <- ggarrange(plots[[1]], plots[[2]], labels = c("A", "B"), ncol = 2, nrow = 1)
+  g1 <- ggarrange(plots[[1]], plots[[2]], ncol = 2, nrow = 1) #labels = c("A", "B"),
+  g1_with_title <- annotate_figure(g1, top = text_grob(paste("TGI thresholds:", substr), size = 14, face = "bold"))
 
-  # Generate figure combining p1 and p2
-  filename <- file.path(projdir, 'figs', paste0('sub-', str_pad(sub, 4, pad = '0'), '.pdf'))
-  #ggsave(g1, file = filename, width = 20, height = 10, dpi = 100, units = "cm")
+  # Save figure
+  filepath <- here::here('figs', paste0(substr, '.pdf'))
+  ggsave(g1_with_title, file = filepath, width = 20, height = 10, dpi = 100, units = "cm")
 })
 ```
 
