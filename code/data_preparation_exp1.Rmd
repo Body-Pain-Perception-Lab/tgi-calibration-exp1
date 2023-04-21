@@ -12,9 +12,9 @@ library(RColorBrewer)
 library(ggpubr)
 
 ```
-# Temporary solution
-
+# Load data
 ```{r}
+
 source(here::here("code","read_bids.R"))
 
 # Initialize parameters
