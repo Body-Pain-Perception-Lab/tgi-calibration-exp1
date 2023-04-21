@@ -76,19 +76,19 @@ vas <- read.csv(here::here("data", "vas.csv"), header = TRUE)
 
 # Calculate median of VAS ratings and VAS response times
 vas_temps <- vas %>%
-  group_by(sub, threshold, gain, stim_type, vas_type) %>%
+  group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%
   summarize(temp_cold = mean(target_cold_t1), temp_warm = mean(target_warm_t1))
 
 vas_ratings <- vas %>%
-  group_by(sub, threshold, gain, stim_type, vas_type) %>%
+  group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%
   summarize(vas_rating_median = median(vas_rating), vas_rt_median = median(vas_rt))
 
-df_vas <- inner_join(vas_temps, vas_ratings, by = c('sub', 'threshold', 'gain', 'stim_type', 'vas_type'))
+df_vas <- inner_join(vas_temps, vas_ratings, by = c('sub', 'ses', 'threshold', 'gain', 'stim_type', 'vas_type'))
 df_vas
 ```
 # Thresholds: summary
 Define threshold function data and restrict data to TGI range (i.e., all data points below CPT and above HPT are defined as NA)
-```{r}
+```{r warning=FALSE}
 # Load fast and psi threshold data
 fe <- read.csv(here::here("data", "fastEst.csv"), header = TRUE)
 psi <- read.csv(here::here("data", "psi.csv"), header = TRUE)
@@ -96,29 +96,59 @@ psi <- read.csv(here::here("data", "psi.csv"), header = TRUE)
 sublist <- unique(fe$sub)
 seslist <- c(1,2)
 
-fe_df <- crossing(sublist, seslist) %>%
-  pmap_dfr(function(sub, ses) {
-    psi_sub <- psi %>% filter(sub == sub & ses == ses) # define CPT and HPT for one participant
+df_fe <- crossing(sublist, seslist) %>%
+  pmap_dfr(function(sublist, seslist) {
+    psi_sub <- psi %>% filter(sub == sublist & ses == seslist) # define CPT and HPT for one participant
     cpt <- psi_sub %>% filter(quality == 'cold')
     hpt <- psi_sub %>% filter(quality == 'warm')
-    fe_sub <- fastEst %>% filter(sub == sub & ses == ses) # define data for each subject
+    fe_sub <- fe %>% filter(sub == sublist & ses == seslist) # define data for each subject
     fe_sub$temp_cold_na <- fe_sub$temp_cold # copy temp cold_column
     fe_sub$temp_cold_na[fe_sub$temp_cold < cpt$threshold | fe_sub$temp_warm > hpt$threshold] <- NA # remove data below CPT and above HPT
     fe_sub
   })
-fe_df
+df_fe
 
+# Select the last row with non-NA data
+df_psi <- psi %>%
+  group_by(sub, ses, quality) %>%
+  filter((quality == "warm" & !is.na(threshold)) | (quality == "cold" & !is.na(threshold))) %>%
+  slice(n())
+df_psi
 ```
+
+```{r}
+df_psi <-
+  
+```
+
 # Plot data for each participant
 ```{r}
-source(here::here('code','figs','plotFast_v1.R'))
-sublist <- 1:27
+source(here::here('code','plotFast_v1.R'))
+sublist <- 1#unique(fe$sub)
 
 walk(sublist, function(sub) {
-  p1 <- plotFast_v1(sub, 1)
-  p2 <- plotFast_v1(sub, 2)
-  filename <- file.path(projdir, 'code', 'figs', paste0('sub-', str_pad(sub, 4, pad = '0'), '.pdf'))
-  g1 <- ggarrange(p1, p2, labels = c('A', 'B'))
-  ggsave(g1, file = filename, width = 
+  plots <- list()
+        
+  # Filter data to plot        
+  for (seslist in 1:2) {
+    # Filter data for a specific participant and session
+    vas_sub <- df_vas %>% filter(sub == sublist & ses == seslist)
+    fe_sub <- df_fe %>% filter(sub == sublist & ses == seslist)
+    psi_sub <- df_psi %>% filter(sub == sublist & ses == seslist)
+    
+    # Set title for the session
+    title <- paste('fast TGI', paste('Subject', sublist), paste('Session', seslist), sep = " ")
+
+    # Plot the session
+    plots[[seslist]] <- plotFast_v1(vas_sub, fe_sub, psi_sub, title)
+  }
+  
+  # Generate figure combining plots for session 1 and session 2
+  g1 <- ggarrange(plots[[1]], plots[[2]], labels = c("A", "B"), ncol = 2, nrow = 1)
+
+  # Generate figure combining p1 and p2
+  filename <- file.path(projdir, 'figs', paste0('sub-', str_pad(sub, 4, pad = '0'), '.pdf'))
+  #ggsave(g1, file = filename, width = 20, height = 10, dpi = 100, units = "cm")
+})
 ```
 
