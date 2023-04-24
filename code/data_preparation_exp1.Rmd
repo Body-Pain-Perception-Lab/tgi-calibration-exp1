@@ -150,18 +150,20 @@ df_fe
 # Plot threshold and vas data for each participant
 ```{r warning=FALSE}
 source(here::here('code','plot_thresholds_v1.R'))
+source(here::here('code','plot_ratings_v1.R'))
 
-sublist <- unique(fe$sub)
+sublist <- 1#unique(fe$sub)
 
 walk(sublist, function(sub_n) {
-  plots <- list()
-     
+  thr_plots <- list()
+  vas_plots <- list()  
   substr <- paste0('sub-', str_pad(sub_n, 4, pad = '0'))
     
   # Filter data to plot        
   for (seslist in 1:2) {
     # Filter data for a specific participant and session
     vas_sub <- df_vas %>% filter(sub == sub_n & ses == seslist)
+    vas_trl <- vas %>% filter(sub == sub_n & ses == seslist)
     fe_sub <- df_fe %>% filter(sub == sub_n & ses == seslist)
     psi_sub <- df_psi %>% filter(sub == sub_n & ses == seslist)
     
@@ -169,16 +171,21 @@ walk(sublist, function(sub_n) {
     title <- paste(paste('Session', seslist), sep = " ")
 
     # Plot the session
-    plots[[seslist]] <- plot_thresholds_v1(vas_sub, fe_sub, psi_sub, title)
+    thr_plots[[seslist]] <- plot_thresholds_v1(vas_sub, fe_sub, psi_sub, title)
+    vas_plots[[seslist]] <- plot_ratings_v1(vas_trl, "tgi")
   }
   
   # Generate figure combining plots for session 1 and session 2
-  g1 <- ggarrange(plots[[1]], plots[[2]], ncol = 2, nrow = 1) #labels = c("A", "B"),
+  g1 <- ggarrange(thr_plots[[1]], thr_plots[[2]], ncol = 2, nrow = 1) #labels = c("A", "B"),
   g1_with_title <- annotate_figure(g1, top = text_grob(paste("TGI thresholds:", substr), size = 14, face = "bold"))
+  
+  g2 <- ggarrange(vas_plots[[1]], vas_plots[[2]], ncol = 2, nrow = 1)
+  
+  g <- ggarrange(g1, g2, ncol = 1, nrow = 2)
 
   # Save figure
   filepath <- here::here('figs', paste0(substr, '.pdf'))
-  ggsave(g1_with_title, file = filepath, width = 20, height = 10, dpi = 100, units = "cm")
+  #ggsave(g, file = filepath, width = 20, height = 10, dpi = 100, units = "cm")
 })
 ```
 
