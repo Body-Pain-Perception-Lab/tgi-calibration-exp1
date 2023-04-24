@@ -151,7 +151,7 @@ df_fe
 ```{r warning=FALSE}
 source(here::here('code','plot_sub_v1.R'))
 
-sublist <- 1#unique(fe$sub)
+sublist <- unique(fe$sub)
 
 walk(sublist, function(sub_n) {
   thr_plots <- list()
@@ -171,7 +171,7 @@ walk(sublist, function(sub_n) {
 
     # Plot the session
     thr_plots[[seslist]] <- plot_thr_sub_v1(vas_sub, fe_sub, psi_sub, title)
-    vas_plots[[seslist]] <- plot_vas_sub_v1(df_vas)
+    vas_plots[[seslist]] <- plot_vas_sub_v1(vas_sub)
   }
   
   # Generate figure combining plots for session 1 and session 2
@@ -184,7 +184,7 @@ walk(sublist, function(sub_n) {
 
   # Save figure
   filepath <- here::here('figs', paste0(substr, '.pdf'))
-  #ggsave(g, file = filepath, width = 20, height = 10, dpi = 100, units = "cm")
+  ggsave(g, file = filepath, width = 20, height = 20, dpi = 100, units = "cm")
 })
 ```
 
