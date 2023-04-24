@@ -149,8 +149,7 @@ df_fe
 
 # Plot threshold and vas data for each participant
 ```{r warning=FALSE}
-source(here::here('code','plot_thresholds_v1.R'))
-source(here::here('code','plot_ratings_subject_v1.R'))
+source(here::here('code','plot_sub_v1.R'))
 
 sublist <- 1#unique(fe$sub)
 
@@ -171,8 +170,8 @@ walk(sublist, function(sub_n) {
     title <- paste(paste('Session', seslist), sep = " ")
 
     # Plot the session
-    thr_plots[[seslist]] <- plot_thresholds_v1(vas_sub, fe_sub, psi_sub, title)
-    vas_plots[[seslist]] <- plot_ratings_subject_v1(df_vas)
+    thr_plots[[seslist]] <- plot_thr_sub_v1(vas_sub, fe_sub, psi_sub, title)
+    vas_plots[[seslist]] <- plot_vas_sub_v1(df_vas)
   }
   
   # Generate figure combining plots for session 1 and session 2

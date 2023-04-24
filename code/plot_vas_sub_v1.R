@@ -1,4 +1,4 @@
-plot_ratings_v1 <- function(df_vas){
+plot_vas_sub_v1 <- function(df_vas){
   
   # Define colors
   reds6  <- brewer.pal(6, "Reds")

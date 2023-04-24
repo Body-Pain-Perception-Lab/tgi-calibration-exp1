@@ -1,9 +1,10 @@
-plot_ratings_v1 <- function(vas_trl, stim_type){
-  
-  # Define colors
-  reds6  <- brewer.pal(6, "Reds")
-  blues6 <- brewer.pal(6, "Blues")
-  purples6 <- brewer.pal(6, "Purples")
+# Define colors for group-level plots
+reds6  <- brewer.pal(6, "Reds")
+blues6 <- brewer.pal(6, "Blues")
+purples6 <- brewer.pal(6, "Purples")
+
+# Plot VAS ratings for all participants
+plot_vas_group_v1 <- function(vas_trl, stim_type){
   
   # Number of threshold functions
   thr_n = length(unique(vas_trl$threshold))
