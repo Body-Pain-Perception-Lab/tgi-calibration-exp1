@@ -19,7 +19,7 @@ tasks <- c("vas", "fastEst", "fastTrl", "psi")
 filenames <- c("vas.csv", "fastEst.csv", "fastTrl.csv", "psi.csv")
 
 # Define how to load the data: from the "data" folder in GitHub or from an external folder (eg., local folder) using read_bids.R
-data_option <- "read_bids" #"github" # or 
+data_option <- "github" # or "read_bids"
 
 # Parameters for the read_bids option
 if (data_option == "read_bids") {
