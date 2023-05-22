@@ -23,8 +23,8 @@ data_option <- "read_bids" #"github" # or
 
 # Parameters for the read_bids option
 if (data_option == "read_bids") {
-  #projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI"
-  projdir <- "/mnt/cortex/bpp/BPP_BIDS/MINDLAB2022_CalibrationTGI"
+  projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI"
+  #projdir <- "/mnt/cortex/bpp/BPP_BIDS/MINDLAB2022_CalibrationTGI"
   sub <- 1:28     # TO UPDATE BASED ON DATA COLLECTION
   ses <- 1:2
   dat <- "beh"
