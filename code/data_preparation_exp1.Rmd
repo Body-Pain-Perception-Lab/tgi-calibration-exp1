@@ -5,12 +5,10 @@ output: html_notebook
 
 # Load required packages 
 ```{r warning=FALSE}
-library("stringr")
-library("readr")
-library(tidyverse)
-library(RColorBrewer)
-library(ggpubr)
 
+# Load required packages
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(stringr, readr, tidyverse, RColorBrewer, ggpubr, dplyr)
 ```
 # Load data
 ```{r}
@@ -26,7 +24,7 @@ data_option <- "github" # or "read_bids"
 # Parameters for the read_bids option
 if (data_option == "read_bids") {
   projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" # TO UPDATE
-  sub <- 1:27     # TO UPDATE
+  sub <- 1:28     # TO UPDATE BASED ON DATA COLLECTION
   ses <- 1:2
   dat <- "beh"
   save <- TRUE
@@ -96,7 +94,6 @@ df_summary <- df_avail %>%
   group_by(ses) %>%
   summarize(total = length(unique(sub[ses==ses])),
             all_405 = sum(vas == 405), 
-            not_all = sum(vas < 405),
             from200_to405 = sum(vas > 200 & vas < 405), 
             from100_to200 = sum(vas > 100 & vas <= 200), 
             none = sum(vas == 0))
