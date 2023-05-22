@@ -23,8 +23,8 @@ data_option <- "github" # or "read_bids"
 
 # Parameters for the read_bids option
 if (data_option == "read_bids") {
-  #projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI"
-  projdir <- "/mnt/cortex/bpp/BPP_BIDS/MINDLAB2022_CalibrationTGI"
+  #projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" # local folder
+  projdir <- "/mnt/cortex/bpp/BPP_BIDS/MINDLAB2022_CalibrationTGI" # cortex
   sub <- 1:28     # TO UPDATE BASED ON DATA COLLECTION
   ses <- 1:2
   dat <- "beh"
@@ -85,14 +85,30 @@ df_avail[is.na(df_avail)] <- 0
 print(df_avail)
 
 ```
-# How many participants did complete TGI thresholding task?
+# How many participants did complete the TGI thresholding task?
 ```{r}
+all_sub <- sort(as.numeric(unique(df_avail$sub)))
 ses1_df <- df_avail %>% filter(ses == 1 & fastEst == 903)
 ses2_df <- df_avail %>% filter(ses == 2 & fastEst == 903)
-participants_both_ses <- sort(as.numeric(intersect(ses1_df$sub, ses2_df$sub)))
 
-# Print the participants with both ses1 and ses2
-cat("N = ", length(participants_both_ses), "completed TGI thresholding task", "\n")
+participants_both_ses <- sort(as.numeric(intersect(ses1_df$sub, ses2_df$sub)))
+participant_ses1 <- sort(as.numeric(intersect(all_sub, ses1_df$sub)))
+participant_ses2 <- sort(as.numeric(intersect(all_sub, ses2_df$sub)))
+
+# All participants
+cat("N = ", length(all_sub), "showed up for the experiment", "\n")
+cat("c(", paste0(all_sub, collapse = ", "), ")", "\n")
+       
+# Session 1
+cat("N = ", length(participant_ses1), "completed session 1 of the TGI thresholding task", "\n")
+cat("c(", paste0(participant_ses1, collapse = ", "), ")", "\n")
+
+# Session 2
+cat("N = ", length(participant_ses2), "completed session 2 of the TGI thresholding task", "\n")
+cat("c(", paste0(participant_ses2, collapse = ", "), ")", "\n")
+
+# Session 1 and session 2
+cat("N = ", length(participants_both_ses), "completed both sessions of the TGI thresholding task", "\n")
 cat("c(", paste0(participants_both_ses, collapse = ", "), ")", "\n")
 
 ```
