@@ -19,11 +19,12 @@ tasks <- c("vas", "fastEst", "fastTrl", "psi")
 filenames <- c("vas.csv", "fastEst.csv", "fastTrl.csv", "psi.csv")
 
 # Define how to load the data: from the "data" folder in GitHub or from an external folder (eg., local folder) using read_bids.R
-data_option <- "github" # or "read_bids"
+data_option <- "read_bids" #"github" # or 
 
 # Parameters for the read_bids option
 if (data_option == "read_bids") {
-  projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI" # TO UPDATE
+  #projdir <- "/Users/au342995/Documents/MINDLAB2022_CalibrationTGI"
+  projdir <- "/mnt/cortex/bpp/BPP_BIDS/MINDLAB2022_CalibrationTGI"
   sub <- 1:28     # TO UPDATE BASED ON DATA COLLECTION
   ses <- 1:2
   dat <- "beh"
@@ -82,6 +83,19 @@ df_avail[is.na(df_avail)] <- 0
 
 # Print results
 print(df_avail)
+
+```
+# How many participants did complete TGI thresholding task?
+```{r}
+
+ses1_df <- df_avail %>% filter(ses == 1 & fastEst > 0)
+ses2_df <- df_avail %>% filter(ses == 2 & fastEst > 0)
+participants_both_ses <- intersect(ses1_df$sub, ses2_df$sub)
+participants_both_ses <- sort(as.numeric(participants_both_ses))
+
+# Print the participants with both ses1 and ses2
+cat("N = ", length(participants_both_ses), "completed TGI thresholding task", "\n")
+cat("c(", paste0(participants_both_ses, collapse = ", "), ")", "\n")
 
 ```
 
