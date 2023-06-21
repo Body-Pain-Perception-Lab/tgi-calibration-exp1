@@ -1,0 +1,360 @@
+---
+title: "plots and models"
+output: html_document
+date: '2022-05-26'
+---
+```{r}
+#clear all
+rm(list=ls())
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(Matrix, ggplot2, tidyverse, pastecs, DHARMa, glmmTMB, reshape, ggpubr,dplyr,stringr,readr,brms)
+```
+
+## R Markdown
+
+#load data
+```{r}
+#setwd("~/multi_dem_threshholding")
+#path <- "C:/Users/mgane/Documents/Camila/Multidim_Thr/data"
+path <- '/Users/au706606/Library/CloudStorage/OneDrive-Personal/PostDoc/Multidim_Thr/data/Experiment-Part1'
+setwd(path) # set working directory
+df <- read.csv("allData.csv") 
+df$lok = rep(c(rep(1,3),rep(2,3),rep(3,3)),nrow(df)/9)
+```
+```{r}
+#data structure
+df$thresholdProb = as.factor(df$thresholdProb)
+df$gainFract = as.factor(df$gainFract)
+df$lok = as.factor(df$lok)
+df$repetitionN = as.factor(df$repetitionN)
+
+#getting each participants' threshhold probabilty and gainFract temperature and standard deviation of that temperature
+p22 = df %>% group_by(thresholdProb, gainFract,SubID) %>% summarize(mean = mean(targetTwarm), sd = sd(targetTwarm))
+
+
+#plotting these means and standard deviations
+p22 %>% ggplot(aes(x = thresholdProb, y = mean, fill = gainFract))+geom_bar(aes(x = thresholdProb, y = mean, fill = gainFract),stat = "summary",position = "dodge", fun = "mean")+geom_errorbar(aes(x=thresholdProb, fill = gainFract, ymin=mean-sd, ymax=mean+sd),position = position_dodge(width = 0.9))+facet_wrap(~SubID, nrow=3)+ylab("targetTemp-warm")
+```
+
+
+```{r}
+#Plotting it for the cold temperatures
+p22 = df %>% group_by(thresholdProb, gainFract,SubID) %>% summarize(mean = mean(targetTcold), sd = sd(targetTcold))
+p22 %>% ggplot(aes(x = thresholdProb, y = mean, fill = gainFract))+geom_bar(aes(x = thresholdProb, y = mean, fill = gainFract),stat = "summary",position = "dodge", fun = "mean")+geom_errorbar(aes(x=thresholdProb, fill = gainFract, ymin=mean-sd, ymax=mean+sd),position = position_dodge(width = 0.9))+facet_wrap(~SubID, nrow=3)+ylab("targetTemp-cold")
+```
+
+#looking at the distribution of the responses
+```{r}
+#Cold
+df %>% filter(StimType == "Cold") %>% ggplot(aes(vasResponse, fill = StimType))+geom_histogram()+facet_grid(~SubID)+scale_fill_manual(values = c("#1F77B4")) +facet_wrap(~SubID, nrow=3)
+
+#Warm
+df %>% filter(StimType == "Warm") %>% ggplot(aes(vasResponse, fill = StimType))+geom_histogram()+facet_grid(~SubID)+scale_fill_manual(values = c("#D62728")) +facet_wrap(~SubID, nrow=3)
+
+#Burning
+df %>% filter(StimType == "TGI") %>% ggplot(aes(vasResponse, fill = StimType))+geom_histogram()+facet_grid(~SubID)+scale_fill_manual(values = c("#2CA02C")) +facet_wrap(~SubID, nrow=3)
+
+# To see one participant
+df %>% filter(SubID == unique(df$SubID)[1]) %>% ggplot(aes(vasResponse, fill = StimType))+geom_histogram()+facet_grid(~vasType)+scale_fill_manual(values = c("#1F77B4","#2CA02C","#D62728"))
+
+```
+```{r}
+# Plotting stim duration for each participant
+
+# Determine the number of rows and columns for the grid
+n_rows <- ceiling(sqrt(length(unique(df$SubID))))
+n_cols <- ceiling(length(unique(df$SubID)) / n_rows)
+
+df %>% filter(SubID == unique(df$SubID)[8] & targetTcold<30) %>%ggplot(aes(x=StimDuration,y= targetTcold))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Correlation between Timing and Temperature",
+       x = "Timing", y = "Temperature")
+
+df %>% filter(SubID == unique(df$SubID)[1] & targetTwarm>30) %>%ggplot(aes(x=StimDuration,y= targetTwarm))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  geom_point(color = "red")+
+  labs(title = "Correlation between Timing and Temperature",
+       x = "Timing", y = "Temperature")
+
+df %>% filter(SubID == unique(df$SubID)[1])%>%ggplot(aes(x=StimDuration,y= pmax(30-targetTcold,targetTwarm-30)))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) + facet_wrap(~SubID, nrow=3,scales = "free")+
+  labs(title = "Correlation between Timing and Temperature",
+       x = "Timing", y = "Abs(Temperature)")
+
+```
+
+
+```{r}
+df %>% filter(targetTcold<30) %>%ggplot(aes(x=StimDuration,y= targetTcold))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) + facet_wrap(~SubID, nrow=3,scales = "free")+
+  labs(title = "Correlation between Timing and Temperature",
+       x = "Timing", y = "Temperature")
+
+df %>% filter(targetTwarm>30) %>%ggplot(aes(x=StimDuration,y= targetTwarm))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "red") + facet_wrap(~SubID, nrow=3,scales = "free")+
+  labs(title = "Correlation between Timing and Temperature",
+       x = "Timing", y = "Temperature")
+
+F2<-df %>%ggplot(aes(x=StimDuration,y= pmax(30-targetTcold,targetTwarm-30)))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) + facet_wrap(~SubID, nrow=3,scales = "free")+
+  labs(title = "Correlation between Timing and Temperature",
+       x = "Timing", y = "Abs(Temperature)")
+F2
+ggsave(file.path("figures", "Figure2.png"), plot = F2, device = NULL, width = 20, height = 10, dpi = 300)
+
+
+```
+
+
+```{r}
+#data in wide format
+df1 = df %>% pivot_wider(names_from = vasType, values_from = vasResponse)
+
+#making the Vas-responses to proportions
+df1$burnbeta = ifelse(df1$Burn==100, df1$burnbeta  <- df1$Burn-0.0001, df1$burnbeta  <- df1$Burn)
+df1$burnbeta = df1$burnbeta/100
+
+df1$coldbeta = ifelse(df1$Cold==100, df1$coldbeta <- df1$Cold-0.0001, df1$coldbeta <- df1$Cold)
+df1$coldbeta = df1$coldbeta/100
+
+df1$warmbeta = ifelse(df1$Warm==100, df1$warmbeta <- df1$Warm-0.0001, df1$warmbeta <- df1$Warm)
+df1$warmbeta = df1$warmbeta/100
+
+#doings stuff to make the length of the factor levels the same
+df1$StimType = as.factor(df1$StimType)
+df1$gainFract = as.factor(df1$gainFract)
+df1$thresholdProb = as.factor(df1$thresholdProb)
+
+
+levels(df1$StimType) = c("Innocuous Cold","TGI","Innocuous Warm")
+levels(df1$gainFract) = c("0.25L","0.50L","0.75L")
+levels(df1$thresholdProb) = c("0.25","0.50","0.75")
+
+#reference level TGI
+df1$StimType = relevel(df1$StimType, ref = "TGI")
+
+
+#models
+m_cold <- glmmTMB::glmmTMB(coldbeta ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+(1|SubID),#+(1|lok)+(1|repetitionN),
+                         family = glmmTMB::beta_family(),
+                         ziformula =~1+StimType,
+                         data = df1)
+
+m_warm <- glmmTMB::glmmTMB(warmbeta ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+(1|SubID),#+(1|lok)+(1|repetitionN),
+                         family = glmmTMB::beta_family(),
+                         ziformula =~1+StimType,
+                         data = df1)
+
+
+m_burn <- glmmTMB::glmmTMB(burnbeta ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+(1|SubID),#+(1|lok)+(1|repetitionN),
+                         family = glmmTMB::beta_family(),
+                         ziformula =~1+StimType,
+                         data = df1)
+
+
+
+# m_burn_int <- glmmTMB::glmmTMB(burnbeta ~ StimType*thresholdProb*gainFract+StimDuration+trialN+vasReactionTime+(1|SubID)+(1|lok)+(1|repetitionN),
+#                          family = glmmTMB::beta_family(),
+#                          ziformula =~1+StimType,
+#                          data = df1)
+
+#looking at the summary
+
+summary(m_cold)
+summary(m_warm)
+summary(m_burn)
+# summary(m_burn_int)
+
+
+#looking at the model assumptions
+plot(simulateResiduals(m_cold))
+plot(simulateResiduals(m_warm))
+plot(simulateResiduals(m_burn))
+# plot(simulateResiduals(m_burn_int))
+
+
+```
+
+#not relevant as its confidence intervals for predictions
+#colds = ggeffects::ggpredict(m_cold, terms = c("thresholdProb","StimType","gainFract"), #type = "re")
+#warms = ggeffects::ggpredict(m_warm, terms = c("thresholdProb","StimType","gainFract"), #type = "re")
+#burns = ggeffects::ggpredict(m_burn, terms = c("thresholdProb","StimType","gainFract"), #type = "re")
+#ggline(df1, 
+#       x = "thresholdProb", 
+#       y = "burnbeta", 
+#       col='StimType', 
+#       add = c("mean_se", "dodge"), 
+#       palette = "jco")
+
+
+
+#Function to make a barplot of the stim/threshholdprobability and gainfract
+#ggtitle(paste("Predicted", dependent, "Ratings based on zero-inflated beta regression", "(PSI)"))
+#label_both
+#theme_bw
+```{r}
+plotter = function(model, dependent){
+dependent = as.character(dependent)
+test = emmeans::emmeans(model, pairwise ~ StimType +thresholdProb+gainFract)
+data = summary(test)$emmean
+data$testpredicted = plogis(data$emmean)
+data$high = plogis(data$emmean+data$SE)
+data$low = plogis(data$emmean-data$SE)
+plot = data  %>%  ggplot(aes(x = thresholdProb, y = testpredicted, fill = StimType))+geom_bar(aes(x = thresholdProb, y = testpredicted, fill = StimType),stat = "summary",position = "dodge", fun = "mean")+geom_errorbar(aes(x=thresholdProb, fill = StimType, ymin=low, ymax=high),position = position_dodge(width = 0.9))+facet_grid(~gainFract,labeller = label_value)+scale_fill_manual(values = c("#128C7E","#00ccffff","#ff8080ff"))+xlab("Probability")+ylab(paste("Predicted-VAS-rating (",dependent,")"))+
+  ggtitle(paste("Predicted", dependent, "Ratings"))+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        legend.position="bottom",
+        legend.title = element_blank())+
+  theme(text = element_text(size=16),axis.text.x = element_text(size=16),axis.text.y = element_text(size=16))
+
+sum = summary(model)
+
+retuner = list(plot,sum,test)
+return(retuner)
+}
+
+#"#42d1f5","#ed85c9","#D62728"
+#"#2CA02C","#42d1f5","#ed85c9"
+
+```
+
+
+#cold ratings:
+```{r}
+plotter(m_cold,"Cold")
+```
+
+#warm ratings
+```{r}
+plotter(m_warm, "Warm")
+```
+
+
+```{r}
+plotter(m_burn, "Burn")
+ggsave(path = path, filename = 'lme', device='png', dpi=700)
+```
+
+
+```{r}
+#plotter(m_burn_int, "Burn")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Baysian
+```{r}
+#define model
+m_burn <- glmmTMB::glmmTMB(burnbeta ~ StimType+StimDuration+gainFract+thresholdProb+trialN+vasReactionTime+(1|SubID),#+repetitionN
+                         family = glmmTMB::beta_family(),
+                         ziformula =~1+StimType,
+                         data = df1)
+?brms::brmsfamily()
+
+b_m0 = bf(burnbeta ~ StimType+StimDuration+gainFract+thresholdProb+trialN+vasReactionTime+(1|SubID), #+repetitionN
+          family = zero_one_inflated_beta())
+
+View(get_prior(b_m0, data = df1))
+
+#prior for m_0 with quite conservative priors
+prior_b_m0 = c(
+   #prior(normal(0,0.5), class = b),
+   prior(normal(0,1), class = b),
+   prior(normal(0.5,1), class = sd, group = SubID))
+
+
+#model0
+prior_main_m0 = brm(
+  b_m0,
+  df1,
+  family = zero_one_inflated_beta,
+  sample_prior = T,
+  prior = prior_b_m0,
+    control=list(
+    adapt_delta = 0.99,
+    max_treedepth = 20),
+  file = "brm-zoib_real"
+)
+
+
+
+#prior_predictive check
+pp_check(prior_main_m0, nsamples = 100)
+
+
+summary(prior_main_m0)
+
+```
+
+
+
+
+
+
+
+
+#contrats extraction with p-values
+#what contrasts are interresting?
+#```{r}
+results = plotter(m_burn_int, "Burning")
+
+aa = summary(results[3][[1]])$contrast
+
+aa = aa %>% filter(grepl("TGI", aa$contrast) == TRUE,grepl("Warm", aa$contrast) == TRUE)
+
+#to extract some combination of contrasts
+aa %>% filter((substr(contrast,6,9) == substr(contrast,23,26)) == TRUE) %>% filter((substr(contrast,11,14) == substr(contrast,28,31)) == TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
