@@ -17,7 +17,8 @@ for sub_n = subject
         thr = thr2tsv(path, project, sub_n, ses_n, 'fasttgi', datatype); % fast multi-threshold data 
         res = res2tsv(path, project, sub_n, ses_n, 'fasttgi', datatype); % trial-by-trial response data
         psi = psi2tsv(path, project, sub_n, ses_n, 'psipain', datatype); % psi threshold data
-        vas = vas2tsv_v1(path, project, sub_n, ses_n, 'vastgi', datatype, thr);  % VAS rating data
+%         vas = vas2tsv_v1(path, project, sub_n, ses_n, 'vastgi', datatype,thr);  % VAS rating data
+        vas = vas2tsv_v2(path, project, sub_n, ses_n, 'vastgi', datatype);  % VAS rating data
     end
 end
 
