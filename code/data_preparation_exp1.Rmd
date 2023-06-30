@@ -142,7 +142,8 @@ df_summary
 # Calculate median of VAS ratings and VAS response times
 vas_temps <- vas %>%
   group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%
-  summarize(temp_cold = mean(target_cold_t1), temp_warm = mean(target_warm_t1))
+  #summarize(temp_cold = mean(target_cold_t1), temp_warm = mean(target_warm_t1))
+  summarize(temp_cold = mean(target_cold), temp_warm = mean(target_warm))
 
 vas_ratings <- vas %>%
   group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%

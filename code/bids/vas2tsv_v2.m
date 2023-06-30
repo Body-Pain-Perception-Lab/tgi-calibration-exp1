@@ -109,8 +109,8 @@ function t = vas2tsv_v2(path, project, sub_n, ses_n, task, datatype)
         m = 3; % number of ratings per trial
 
         % Create variables for table
-        sub_n       = repmat(sub_n,n*m,1);
-        ses_n       = repmat(ses_n,n*m,1);
+        sub       = repmat(sub_n,n*m,1);
+        ses       = repmat(ses_n,n*m,1);
         task        = repmat(task,n*m,1);
         datatype    = repmat(datatype,n*m,1);
         trial_n     = repmat(transpose(1:n),3,1);
@@ -131,7 +131,7 @@ function t = vas2tsv_v2(path, project, sub_n, ses_n, task, datatype)
         vas_rt      = out.Results.vasReactionTime(:);
 
         % create table with VAS rating data
-        t = table(sub_n, ses_n, task, datatype, trial_n, rep_n, target_cold, target_warm, temp1, temp2, temp3, temp4, temp5, threshold, gain, stim_type, StimDuration,vas_type, vas_rating, vas_rt);
+        t = table(sub, ses, task, datatype, trial_n, rep_n, target_cold, target_warm, temp1, temp2, temp3, temp4, temp5, threshold, gain, stim_type, StimDuration,vas_type, vas_rating, vas_rt);
 
         % write table
         writetable(t,filename,'FileType','text','Delimiter','\t');
