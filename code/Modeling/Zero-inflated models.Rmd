@@ -6,12 +6,15 @@ date: '2022-05-26'
 ```{r}
 #clear all
 rm(list=ls())
+#10% guess rate.
+#tb (baseline temp) = 30
+
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-pacman::p_load(Matrix, ggplot2, tidyverse, pastecs, DHARMa, glmmTMB, reshape, ggpubr,dplyr,stringr,readr,brms)
+pacman::p_load(Matrix, ggplot2, tidyverse, pastecs, DHARMa, glmmTMB, reshape, ggpubr,dplyr,stringr,readr,brms, gamlss)
 ```
 
 ## R Markdown
@@ -20,11 +23,12 @@ pacman::p_load(Matrix, ggplot2, tidyverse, pastecs, DHARMa, glmmTMB, reshape, gg
 ```{r}
 #setwd("~/multi_dem_threshholding")
 #path <- "C:/Users/mgane/Documents/Camila/Multidim_Thr/data"
-path <- '/Users/au706606/Library/CloudStorage/OneDrive-Personal/PostDoc/Multidim_Thr/data/Experiment-Part1'
-setwd(path) # set working directory
-df <- read.csv("allData.csv") 
+df <- read.csv(here::here("code","Modeling","allData.csv")) 
 df$lok = rep(c(rep(1,3),rep(2,3),rep(3,3)),nrow(df)/9)
 ```
+
+
+
 ```{r}
 #data structure
 df$thresholdProb = as.factor(df$thresholdProb)
@@ -117,101 +121,287 @@ ggsave(file.path("figures", "Figure2.png"), plot = F2, device = NULL, width = 20
 
 
 ```{r}
+#new modeling only needs the data to be in [0 ; 1]
+df$vasResponsebeta = df$vasResponse/100
+
+
 #data in wide format
-df1 = df %>% pivot_wider(names_from = vasType, values_from = vasResponse)
+df1= df %>% pivot_wider(id_cols = c(SubID, trialN, StimType,gainFract,thresholdProb,StimDuration), names_from = vasType, values_from = c(vasResponsebeta, vasReactionTime))
 
-#making the Vas-responses to proportions
-df1$burnbeta = ifelse(df1$Burn==100, df1$burnbeta  <- df1$Burn-0.0001, df1$burnbeta  <- df1$Burn)
-df1$burnbeta = df1$burnbeta/100
-
-df1$coldbeta = ifelse(df1$Cold==100, df1$coldbeta <- df1$Cold-0.0001, df1$coldbeta <- df1$Cold)
-df1$coldbeta = df1$coldbeta/100
-
-df1$warmbeta = ifelse(df1$Warm==100, df1$warmbeta <- df1$Warm-0.0001, df1$warmbeta <- df1$Warm)
-df1$warmbeta = df1$warmbeta/100
-
-#doings stuff to make the length of the factor levels the same
+#make things a factor and making the levels make sense
 df1$StimType = as.factor(df1$StimType)
 df1$gainFract = as.factor(df1$gainFract)
 df1$thresholdProb = as.factor(df1$thresholdProb)
+df1$SubID = as.factor(df1$SubID)
 
 
 levels(df1$StimType) = c("Innocuous Cold","TGI","Innocuous Warm")
 levels(df1$gainFract) = c("0.25L","0.50L","0.75L")
 levels(df1$thresholdProb) = c("0.25","0.50","0.75")
 
+
+## first we look at the complete models with three way interactions
+
+########## Cold ratings
+
+#for the gamlss models to work it makes sense to only include the variables we include in the model as the gamlss models don't handle NA's well
+dfcold = df1 %>% dplyr::select(-c(vasResponsebeta_Warm, vasResponsebeta_Burn, vasReactionTime_Burn, vasReactionTime_Warm))
+
+dfcold$StimType = relevel(dfcold$StimType, ref = "Innocuous Cold")
+
+main_cold_int <- gamlss(vasResponsebeta_Cold ~ StimType*thresholdProb*gainFract+trialN+vasReactionTime_Cold+StimDuration+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Cold+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Cold+random(SubID),
+           data = dfcold,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+
+summary(main_cold_int)
+
+
+
+############## Warm ratings
+
+dfwarm = df1 %>% dplyr::select(-c(vasResponsebeta_Cold, vasResponsebeta_Burn, vasReactionTime_Burn, vasReactionTime_Cold))
+
+
+dfwarm$StimType = relevel(dfwarm$StimType, ref = "Innocuous Warm")
+
+
+main_warm_int <- gamlss(vasResponsebeta_Warm ~ StimType*thresholdProb*gainFract+trialN+vasReactionTime_Warm+StimDuration+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Warm+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Warm+random(SubID),
+           data = dfwarm,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+
+summary(main_warm_int)
+
+
+############ Burning ratings
+
+dfburn = df1 %>% dplyr::select(-c(vasResponsebeta_Cold, vasResponsebeta_Warm, vasReactionTime_Warm, vasReactionTime_Cold))
+
+dfburn$StimType = relevel(dfburn$StimType, ref = "TGI")
+
+
+main_burn_int <- gamlss(vasResponsebeta_Burn ~ StimType*thresholdProb*gainFract+trialN+vasReactionTime_Burn+StimDuration+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Burn+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Burn+random(SubID),
+           data = dfburn,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+
+summary(main_burn_int)
+
+
+
+#plot the assumptions
+
+
+plot(main_cold_int)
+plot(main_warm_int)
+plot(main_burn_int)
+```
+
+
+```{r}
+## Now only with main effects
+
+###########cold ratings
+
 #reference level TGI
-df1$StimType = relevel(df1$StimType, ref = "TGI")
+dfcold$StimType = relevel(dfcold$StimType, ref = "Innocuous Cold")
 
 
-#models
-m_cold <- glmmTMB::glmmTMB(coldbeta ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+(1|SubID),#+(1|lok)+(1|repetitionN),
-                         family = glmmTMB::beta_family(),
-                         ziformula =~1+StimType,
-                         data = df1)
-
-m_warm <- glmmTMB::glmmTMB(warmbeta ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+(1|SubID),#+(1|lok)+(1|repetitionN),
-                         family = glmmTMB::beta_family(),
-                         ziformula =~1+StimType,
-                         data = df1)
+main_cold <- gamlss(vasResponsebeta_Cold ~ StimType+thresholdProb+gainFract+trialN+vasReactionTime_Cold+StimDuration+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Cold+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Cold+random(SubID),
+           data = dfcold,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
 
 
-m_burn <- glmmTMB::glmmTMB(burnbeta ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+(1|SubID),#+(1|lok)+(1|repetitionN),
-                         family = glmmTMB::beta_family(),
-                         ziformula =~1+StimType,
-                         data = df1)
+summary(main_cold)
+
+###########warm ratings
+
+dfwarm = df1 %>% dplyr::select(-c(vasResponsebeta_Cold, vasResponsebeta_Burn, vasReactionTime_Burn, vasReactionTime_Cold))
+
+dfwarm$StimType = relevel(dfwarm$StimType, ref = "Innocuous Warm")
 
 
-
-# m_burn_int <- glmmTMB::glmmTMB(burnbeta ~ StimType*thresholdProb*gainFract+StimDuration+trialN+vasReactionTime+(1|SubID)+(1|lok)+(1|repetitionN),
-#                          family = glmmTMB::beta_family(),
-#                          ziformula =~1+StimType,
-#                          data = df1)
-
-#looking at the summary
-
-summary(m_cold)
-summary(m_warm)
-summary(m_burn)
-# summary(m_burn_int)
+main_warm <- gamlss(vasResponsebeta_Warm ~ StimType+thresholdProb+gainFract+trialN+vasReactionTime_Warm+StimDuration+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Warm+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Warm+random(SubID),
+           data = dfwarm,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
 
 
-#looking at the model assumptions
-plot(simulateResiduals(m_cold))
-plot(simulateResiduals(m_warm))
-plot(simulateResiduals(m_burn))
-# plot(simulateResiduals(m_burn_int))
+summary(main_warm)
+
+
+######## Burning
+
+dfburn = df1 %>% dplyr::select(-c(vasResponsebeta_Cold, vasResponsebeta_Warm, vasReactionTime_Warm, vasReactionTime_Cold))
+
+dfburn$StimType = relevel(dfburn$StimType, ref = "TGI")
+
+
+main_burn <- gamlss(vasResponsebeta_Burn ~ StimType+thresholdProb+gainFract+trialN+vasReactionTime_Burn+StimDuration+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Burn+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime_Burn+random(SubID),
+           data = dfburn,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+
+summary(main_burn)
+
+
+#### assumptions
+
+plot(main_cold)
+plot(main_warm)
+plot(main_burn)
+```
+
+```{r}
+
+#function to extract estimates of the models
+summary_stats_zoib = function(model, coefficients, round, part, intercept = FALSE){
+  
+  if(intercept == TRUE){
+  
+  a = summary(model)
+  coef = a[1,1]
+  std =a[1,2]
+  stat = a[1,3]
+  p = a[1,4]
+  
+  return(list(beta = round(coef,round),std = round(std,round),stat = round(stat,round),p = p))
+  }
+  
+  if(part == "mu"){
+    index = 1
+  }else if (part == "nu"){
+    index = 1+2+coefficients
+  } else if (part == "tau"){
+    index = 2+2+2*coefficients
+  }else{
+    print("Give correct part")
+  }
+  
+  a = summary(model)
+  coef = array(NA, coefficients)
+  std = array(NA, coefficients)
+  stat = array(NA, coefficients)
+  p = array(NA, coefficients)
+  
+  for (i in 1:coefficients){
+    coef[i] = a[index+i,1]
+    std[i] = a[index+i,2]
+    stat[i] = a[index+i,3]
+    p[i] = a[index+i,4]
+    
+  }
+  
+  return(list(beta = round(coef,round),std = round(std,round),stat = round(stat,round),p = p))
+  
+  
+}
 
 
 ```
 
-#not relevant as its confidence intervals for predictions
-#colds = ggeffects::ggpredict(m_cold, terms = c("thresholdProb","StimType","gainFract"), #type = "re")
-#warms = ggeffects::ggpredict(m_warm, terms = c("thresholdProb","StimType","gainFract"), #type = "re")
-#burns = ggeffects::ggpredict(m_burn, terms = c("thresholdProb","StimType","gainFract"), #type = "re")
-#ggline(df1, 
-#       x = "thresholdProb", 
-#       y = "burnbeta", 
-#       col='StimType', 
-#       add = c("mean_se", "dodge"), 
-#       palette = "jco")
 
 
 
-#Function to make a barplot of the stim/threshholdprobability and gainfract
-#ggtitle(paste("Predicted", dependent, "Ratings based on zero-inflated beta regression", "(PSI)"))
-#label_both
-#theme_bw
+```{r}
+
+## extracting coeficients for the mean part
+
+coef = summary_stats_zoib(main_burn, 9,2,"mu",intercept = FALSE)
+
+intercept = summary_stats_zoib(main_burn, 9,2,"mu",intercept = TRUE)
+
+## The raw data:
+dfburn %>% filter(vasResponsebeta_Burn != 0 & vasResponsebeta_Burn != 1) %>% filter(StimType == "TGI") %>% group_by(thresholdProb) %>% summarize(mean = mean(vasResponsebeta_Burn))
+
+### doing the same for the zero part and interpretning the results:
+
+coef = summary_stats_zoib(main_burn, 9,2,"nu",intercept = FALSE)
+
+intercept = summary_stats_zoib(main_burn, 9,2,"nu",intercept = TRUE)
+
+## recalculating the probabilities (have to take the intercept into account because of the non-linear logit transformation)
+
+meaneffect_procent_25_to_50 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[4])
+
+meaneffect_procent_25_to_75 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[5])
+
+plus_2d_procent_25_to_50 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[4]-2*coef$std[4])
+minus_2d_procent_25_to_50 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[4]+2*coef$std[4])
+
+brms::inv_logit_scaled(1.032455)-plus_2d_procent_25_to_50
+brms::inv_logit_scaled(1.032455)-meaneffect_procent_25_to_50
+brms::inv_logit_scaled(1.032455)-minus_2d_procent_25_to_50
+
+
+
+
+meaneffect_procent_25_to_75 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[5])
+plus_2d_procent_25_to_75 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[5]-2*coef$std[5])
+minus_2d_procent_25_to_75 = brms::inv_logit_scaled(1.032455)-brms::inv_logit_scaled(1.032455+coef$beta[5]+2*coef$std[5])
+
+brms::inv_logit_scaled(1.032455)-plus_2d_procent_25_to_75
+brms::inv_logit_scaled(1.032455)-meaneffect_procent_25_to_75
+brms::inv_logit_scaled(1.032455)-minus_2d_procent_25_to_75
+
+```
+
+```{r, fig.height=7.5, fig.width=10}
+alphas = 0.3
+#plot data
+
+levels(df$gainFract)
+df %>% dplyr::rename(Gain = gainFract, RatingScale = vasType) %>% group_by(SubID,StimType,thresholdProb,Gain, RatingScale) %>% summarize(mean = mean(vasResponsebeta), sd = sd(vasResponsebeta), se = sd/sqrt(n())) %>% 
+  ggplot()+
+#  geom_line(aes(x = thresholdProb, y = mean, group = interaction(SubID, StimType), col = StimType), alpha = alphas)+
+#  geom_point(aes(x = thresholdProb, y = mean),alpha = alphas)+
+  facet_grid(RatingScale~Gain, labeller = label_both)+
+  theme_classic()+
+  geom_bar(data = df %>% dplyr::rename(Gain = gainFract, RatingScale = vasType) %>% group_by(StimType,thresholdProb,Gain, RatingScale) %>% summarize(mean = mean(vasResponsebeta), sd = sd(vasResponsebeta), se = sd/sqrt(n())), aes(x = thresholdProb, y = mean, fill = StimType), stat = "identity", position = "dodge")+
+  
+  geom_errorbar(data = df  %>% dplyr::rename(Gain = gainFract, RatingScale = vasType) %>%  group_by(StimType,thresholdProb,Gain,RatingScale) %>% summarize(mean = mean(vasResponsebeta), sd = sd(vasResponsebeta), se = sd/sqrt(n())),aes(x = thresholdProb, y = mean, ymin = mean-2*se, ymax = mean+2*se, col = StimType), position = "dodge")+
+  scale_color_manual(values = c("#00ccffff","#128C7E","#ff8080ff"))+
+  scale_fill_manual(values = c("#00ccffff","#128C7E","#ff8080ff"))+
+  geom_point(aes(x = thresholdProb, y = mean, fill = StimType),position = position_jitterdodge(jitter.width = 0.1), pch=21, alpha = 0.3)+ggtitle("Raw data with datapoints")
+  
+
+```
+
+
+
 ```{r}
 plotter = function(model, dependent){
+  
+ga1 = ggeffects::ggpredict(model, terms = c("thresholdProb","StimType","gainFract"), type = "random")
+
 dependent = as.character(dependent)
-test = emmeans::emmeans(model, pairwise ~ StimType +thresholdProb+gainFract)
-data = summary(test)$emmean
-data$testpredicted = plogis(data$emmean)
-data$high = plogis(data$emmean+data$SE)
-data$low = plogis(data$emmean-data$SE)
-plot = data  %>%  ggplot(aes(x = thresholdProb, y = testpredicted, fill = StimType))+geom_bar(aes(x = thresholdProb, y = testpredicted, fill = StimType),stat = "summary",position = "dodge", fun = "mean")+geom_errorbar(aes(x=thresholdProb, fill = StimType, ymin=low, ymax=high),position = position_dodge(width = 0.9))+facet_grid(~gainFract,labeller = label_value)+scale_fill_manual(values = c("#128C7E","#00ccffff","#ff8080ff"))+xlab("Probability")+ylab(paste("Predicted-VAS-rating (",dependent,")"))+
-  ggtitle(paste("Predicted", dependent, "Ratings"))+  theme(plot.title = element_text(hjust = 0.5))+
+
+
+plot = ga1  %>%  ggplot(aes(x = x, y = predicted, fill = group))+
+  geom_bar(aes(x = x, y = predicted, fill = group),stat = "summary",position = "dodge", fun = "mean")+
+  geom_errorbar(aes(x=x, fill = group, ymin=conf.low, ymax=conf.high),position = position_dodge(width = 0.9))+
+  facet_grid(~facet,labeller = label_value)+scale_fill_manual(values = c("#00ccffff","#128C7E","#ff8080ff"))+
+  xlab("Probability")+ylab(paste("Predicted-VAS-rating (",dependent,")"))+
+  ggtitle(paste("Predicted", dependent, "Ratings"))+
+  theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank(), 
@@ -222,7 +412,7 @@ plot = data  %>%  ggplot(aes(x = thresholdProb, y = testpredicted, fill = StimTy
 
 sum = summary(model)
 
-retuner = list(plot,sum,test)
+retuner = list(plot,sum)
 return(retuner)
 }
 
@@ -232,81 +422,51 @@ return(retuner)
 ```
 
 
-#cold ratings:
+
+```{r, fig.height=7.5, fig.width=10}
+
+df_full = df %>% mutate(vasResponse = vasResponse/100, SubID = as.factor(SubID)) %>% dplyr::select(-c(targetTcold, targetTwarm, repetitionN, lok, vasResponsebeta)) %>% drop_na()
+
+full <- gamlss(vasResponse ~ (StimType+thresholdProb+gainFract+trialN+vasReactionTime+StimDuration)*vasType+random(SubID),
+           nu.formula = ~StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+random(SubID),
+           tau.formula = ~ StimType+StimDuration+thresholdProb+gainFract+trialN+vasReactionTime+random(SubID),
+           data = df_full,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+ga1 = ggeffects::ggpredict(full, terms = c("thresholdProb","StimType","gainFract", "vasType"), type = "random")
+
+
+ga1  %>%  ggplot(aes(x = x, y = predicted, fill = group))+
+  geom_bar(aes(x = x, y = predicted, fill = group),stat = "summary",position = "dodge", fun = "mean")+
+  geom_errorbar(aes(x=x, fill = group, ymin=conf.low, ymax=conf.high, col = group),position = position_dodge(width = 0.9))+
+  facet_grid(panel~facet,labeller = label_value)+
+  scale_fill_manual(values = c("#00ccffff","#128C7E","#ff8080ff"))+
+  scale_color_manual(values = c("#00ccffff","#128C7E","#ff8080ff"))+theme_classic()+ggtitle("Model Predictions")+xlab("Treshold")+coord_cartesian(ylim = c(0,1))
+
+
+
+```
+
 ```{r}
-plotter(m_cold,"Cold")
+#plotting the model predictions for both interation and main effect.
+
+plotter(main_cold,"Cold")
+plotter(main_cold_int,"Cold")
+
 ```
 
 #warm ratings
 ```{r}
-plotter(m_warm, "Warm")
+plotter(main_warm, "Warm")
+plotter(main_warm_int, "Warm")
+
 ```
 
 
 ```{r}
-plotter(m_burn, "Burn")
-ggsave(path = path, filename = 'lme', device='png', dpi=700)
-```
-
-
-```{r}
-#plotter(m_burn_int, "Burn")
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Baysian
-```{r}
-#define model
-m_burn <- glmmTMB::glmmTMB(burnbeta ~ StimType+StimDuration+gainFract+thresholdProb+trialN+vasReactionTime+(1|SubID),#+repetitionN
-                         family = glmmTMB::beta_family(),
-                         ziformula =~1+StimType,
-                         data = df1)
-?brms::brmsfamily()
-
-b_m0 = bf(burnbeta ~ StimType+StimDuration+gainFract+thresholdProb+trialN+vasReactionTime+(1|SubID), #+repetitionN
-          family = zero_one_inflated_beta())
-
-View(get_prior(b_m0, data = df1))
-
-#prior for m_0 with quite conservative priors
-prior_b_m0 = c(
-   #prior(normal(0,0.5), class = b),
-   prior(normal(0,1), class = b),
-   prior(normal(0.5,1), class = sd, group = SubID))
-
-
-#model0
-prior_main_m0 = brm(
-  b_m0,
-  df1,
-  family = zero_one_inflated_beta,
-  sample_prior = T,
-  prior = prior_b_m0,
-    control=list(
-    adapt_delta = 0.99,
-    max_treedepth = 20),
-  file = "brm-zoib_real"
-)
-
-
-
-#prior_predictive check
-pp_check(prior_main_m0, nsamples = 100)
-
-
-summary(prior_main_m0)
+plotter(main_burn, "Burn")
+plotter(main_burn_int, "Burn")
 
 ```
 
@@ -315,20 +475,6 @@ summary(prior_main_m0)
 
 
 
-
-
-#contrats extraction with p-values
-#what contrasts are interresting?
-#```{r}
-results = plotter(m_burn_int, "Burning")
-
-aa = summary(results[3][[1]])$contrast
-
-aa = aa %>% filter(grepl("TGI", aa$contrast) == TRUE,grepl("Warm", aa$contrast) == TRUE)
-
-#to extract some combination of contrasts
-aa %>% filter((substr(contrast,6,9) == substr(contrast,23,26)) == TRUE) %>% filter((substr(contrast,11,14) == substr(contrast,28,31)) == TRUE)
-```
 
 
 
