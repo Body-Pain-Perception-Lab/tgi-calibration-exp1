@@ -199,7 +199,7 @@ walk(sublist, function(sub_n) {
     vas_trl <- vas %>% filter(sub == sub_n & ses == seslist)
     fe_sub <- df_fe %>% filter(sub == sub_n & ses == seslist)
     psi_sub <- df_psi %>% filter(sub == sub_n & ses == seslist)
-    
+    m
     # Set title for the session
     title <- paste(paste('Session', seslist), sep = " ")
 
