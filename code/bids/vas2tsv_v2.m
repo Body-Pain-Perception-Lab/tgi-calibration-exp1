@@ -98,7 +98,11 @@ function t = vas2tsv_v2(path, project, sub_n, ses_n, task, datatype)
         StimType (idx_TGImat(:))  = {'tgi'};
         StimType (idx_Coldmat(:)) = {'cold'};
         StimType (idx_Warmmat(:)) = {'warm'};
-
+        
+        % Create location array
+        location = repmat([ones(3,1); 2*ones(3,1); 3* ones(3,1)],NTrialsTotal/9,1);
+        location = location(1:out.vars.task.NTrialsTotal);
+        
         % TCS data
         for i = 1:size(out.Results.tcsData,1)
             tcs(i,:) = out.Results.tcsData{i}(end,3:7);
@@ -129,9 +133,9 @@ function t = vas2tsv_v2(path, project, sub_n, ses_n, task, datatype)
         vas_type    = [repmat('cold',out.vars.task.NTrialsTotal,1);repmat('warm',out.vars.task.NTrialsTotal,1);repmat('burn',out.vars.task.NTrialsTotal,1)];                   
         vas_rating  = out.Results.vasResponse(:);
         vas_rt      = out.Results.vasReactionTime(:);
-
+        lok         = repmat(location,3,1);
         % create table with VAS rating data
-        t = table(sub, ses, task, datatype, trial_n, rep_n, target_cold, target_warm, temp1, temp2, temp3, temp4, temp5, threshold, gain, stim_type, StimDuration,vas_type, vas_rating, vas_rt);
+        t = table(sub, ses, task, datatype, trial_n, rep_n, target_cold, target_warm, temp1, temp2, temp3, temp4, temp5, threshold, gain, stim_type, StimDuration,vas_type, vas_rating, vas_rt,lok);
 
         % write table
         writetable(t,filename,'FileType','text','Delimiter','\t');

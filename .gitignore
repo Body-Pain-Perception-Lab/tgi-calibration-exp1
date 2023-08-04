@@ -31,3 +31,6 @@ vignettes/*.pdf
 # Files with personal info
 osf_token.txt
 data_import.Rmd
+
+#Matlab 
+*.asv
