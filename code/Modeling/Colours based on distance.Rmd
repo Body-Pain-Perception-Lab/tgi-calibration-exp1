@@ -38,40 +38,87 @@ greys6 <- brewer.pal(6,"Greys")
 Burning choice: yes or no?
 Thermal choice: cold or warm?
 ```{r, warning=FALSE}
-# path <- "/mnt/bpp_bids/MultidimThr"
-#path <- '/Users/au342995/Downloads/multiThr'
-path <- here::here("code","Modeling")
-#filename1 <- paste0('sub-', str_pad(sub, 4, pad = "0"), '.csv')
+path <- here::here("data")
 
 # filenames to import
-filename1 <- 'responses.csv'
-filename2 <- 'limits.csv' # or psipain 
-filename3 <- 'allData.csv'
-filename4 <- 'thresholds.csv'
+filename1 <- 'fastTrl.csv'
+filename2 <- 'psi.csv' # or psipain 
+filename3 <- 'vas.csv'
+filename4 <- 'fastEst.csv'
 
-setwd(path) # set working directory
+session <- c("1") 
 
 # import files
-resp      <- read.csv(file.path(path,filename1))
-lims      <- read.csv(file.path(path,filename2))
-vas       <- read.csv(file.path(path,filename3))
-thr       <- read.csv(file.path(path,filename4))
+resp      <- read.csv(file.path(path,filename1)) %>%  filter(ses %in% session)
+lims      <- read.csv(file.path(path,filename2)) %>%  filter(ses %in% session)
+vas       <- read.csv(file.path(path,filename3)) %>%  filter(ses %in% session)
+thr       <- read.csv(file.path(path,filename4)) %>%  filter(ses %in% session)
 
 # define subjects to import
-sublist <- lims$id #c(0,10,12,13,14,15,16,18)
+sublist <- c("3", "4", "5", "6", "8", "11", "16", "17", "18", "20", "21", "22", "24", "25", "26")
 ```
+
+```{r}
+# Compatibility. Remove later
+
+# VAS
+ vas$thresholdProb <-vas$threshold
+ vas$gainFract <-vas$gain
+# vas$lok = as.factor(vas$lok)
+# vas$repetitionN = as.factor(vas$rep_n)
+
+ vas$SubID <- vas$sub
+ vas$targetTwarm <-  vas$target_warm
+ vas$targetTcold <- vas$target_cold
+ vas$vasResponse <- vas$vas_rating
+# vas$vasType <- vas$vas_type
+ vas$vasReactionTime <- vas$vas_rt
+# vas$trialN <- vas$trial_n
+
+vas <- vas %>%
+  mutate(StimType = case_when(
+    stim_type == "cold" ~ "Cold",
+    stim_type == "warm" ~ "Warm",
+    stim_type == "tgi" ~ "TGI",
+    TRUE ~ as.character(stim_type)  # Keep the original value if no match
+  ))
+
+vas <- vas %>%
+  mutate(vasType = case_when(
+    vas_type == "cold" ~ "Cold",
+    vas_type == "warm" ~ "Warm",
+    vas_type == "burn" ~ "Burn",
+    TRUE ~ as.character(vas_type)  # Keep the original value if no match
+  ))
+
+# lims
+PsiNtrials <-c("30")
+lims$id <- lims$sub
+
+# thr
+thr$id <- thr$sub
+thr$tcold <- thr$temp_cold
+thr$twarm <- thr$temp_warm
+
+#resp
+resp$id   <- resp$sub
+resp$cold_warm <- resp$temp_cw
+```
+
+
 # Fast TGI: Responses 
 Whether the participant perceived burning, cold or warm for each combination of temperatures
 ```{r, warning=FALSE}
 df_resp <- resp
-df_resp$coldT <- as.double(df_resp$coldT)
-df_resp
+df_resp$coldT <- as.double(df_resp$cold_t)
+df_resp$warmT <- as.double(df_resp$warm_t)
+#df_resp
 ```
 # Pain threshold data
 Pain thresholds measured using the methods of limits
 ```{r}
 df_lims <- lims
-df_lims
+#df_lims
 ```
 
 # VAS temperatures and ratings
@@ -96,14 +143,17 @@ df_vas <- merge(vas_temps, vas_ratings, by = c('id', 'threshold', 'level', 'stim
 ```{r}
 df_thr <- data.frame()
 for (subN in sublist) {
-  lims_sub <- df_lims %>% filter(id == subN) # define CPT and HPT for one participant
+  
+  lims_sub <- df_lims %>% filter(id == subN, trial_n == PsiNtrials) # define CPT and HPT for one participant
+  cpt <- lims_sub %>% filter(quality=='cold')
+  hpt <- lims_sub %>% filter(quality=='warm')
+  
   df_sub <- thr %>% filter(id == subN) # define data for each subject (curve)
-  df_sub$twarm_25[df_sub$tcold < lims_sub$cpt | df_sub$twarm_25 > lims_sub$hpt] <- NA # remove data below CPT and above HPT
-  df_sub$twarm_50[df_sub$tcold < lims_sub$cpt | df_sub$twarm_50 > lims_sub$hpt] <- NA # remove data below CPT and above HPT
-  df_sub$twarm_75[df_sub$tcold < lims_sub$cpt | df_sub$twarm_75 > lims_sub$hpt] <- NA # remove data below CPT and above HPT
+  
+  df_sub$twarm[df_sub$tcold < cpt$threshold | df_sub$twarm > hpt$threshold] <- NA # remove data below CPT and above HPT
   df_thr <- rbind(df_thr, df_sub) # concatenate participants data
 }
-df_thr
+#df_thr
 ```
 
 # Bin data and calculate % of cold and warm responses within each bin (this may need to change!)
@@ -116,34 +166,36 @@ for (subN in sublist) {
   df_thr1  = df_thr %>% filter(id == subN)
   df_sub$curve = NA
   for (i in 1:nrow(df_sub)){
-    index = which(df_thr1[,2] == df_sub[i,3]) #find the cold-temperature that matches between what the subject got and the curve
-    d25 = abs(df_thr1[index,3]-df_sub[i,2])
-    d50 = abs(df_thr1[index,4]-df_sub[i,2])
-    d75 = abs(df_thr1[index,5]-df_sub[i,2])
+    index = which(df_thr1[,7] == df_sub[i,6]) #find the cold-temperature that matches between what the subject got and the curve
+    dw = abs(df_thr1[index,8]-df_sub[i,7]) # Difference array for warm Temperature
     
-    if(is.na(d25)==T & is.na(d50)==T & is.na(d75)==T){
+    # d25 = abs(df_thr1[index,3]-df_sub[i,2]) twarm25-warmT
+    # d50 = abs(df_thr1[index,4]-df_sub[i,2])
+    # d75 = abs(df_thr1[index,5]-df_sub[i,2])
+    
+    if(is.na(dw[1])==T & is.na(dw[2])==T & is.na(dw[3])==T){
       next
     }
-    if(is.na(d25)==T){
-      d25 = 100
+    if(is.na(dw[1])==T){
+      dw[1] = 100
     }
-    if(is.na(d50)==T){
-      d50 = 100
-    }
-    
-    if(is.na(d75)==T){
-      d75 = 100
+    if(is.na(dw[2])==T){
+      dw[2] = 100
     }
     
+    if(is.na(dw[3])==T){
+      dw[3] = 100
+    }
     
-    if(d25<d50 & d25<d75){
-      df_sub[i,6] = 1
+    
+    if(dw[1]<dw[2] & dw[1]<dw[3]){
+      df_sub[i,22] = 1
     }
-    if(d50<d25 & d50<d75){
-      df_sub[i,6] = 2
+    if(dw[2]<dw[1] & dw[2]<dw[3]){
+      df_sub[i,22] = 2
     }
-    if(d75<d25 & d75<d50){
-      df_sub[i,6] = 3
+    if(dw[3]<dw[1] & dw[3]<dw[2]){
+      df_sub[i,22] = 3
     }
     }
   df_sub = df_sub %>% filter(curve != 0)
@@ -282,8 +334,12 @@ qq$colour = as.factor(qq$colour)
 
 ```{r Plot a single participant, just change the number in the square backet ([])}
 
-subN = unique(df_lims$id)[2] # change participant number here!
-limits <- df_lims %>% filter(id == subN)
+subN = unique(df_lims$id)[4] # change participant number here!
+limits <- df_lims %>% filter(id == subN, trial_n == PsiNtrials)
+
+# add cpt and hpt as dashed lines
+      cpt <- limits %>% filter(quality=='cold')
+      hpt <- limits %>% filter(quality=='warm')
 
 
 ggplot(df_resp %>% filter(id == subN), mapping = aes(x = coldT, y = warmT)) +
@@ -295,20 +351,20 @@ ggplot(df_resp %>% filter(id == subN), mapping = aes(x = coldT, y = warmT)) +
 
       # add threshold function for every curve
   
-        geom_point(data = qq %>% filter(id == subN & curve == 1 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_25), size = 0.5, color = greys6[6]) +
-  geom_point(data = qq %>% filter(id == subN & curve == 1 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_25), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter(id == subN & curve == 1 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_25), size = 0.5, color = reds6[3]) +
+        geom_point(data = qq %>% filter(id == subN & curve == 1 & threshold==25 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter(id == subN & curve == 1 & threshold==25 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter(id == subN & curve == 1 & threshold==25 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
 
   
-      geom_point(data = qq %>% filter(id == subN & curve == 2 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = greys6[6]) +
-  geom_point(data = qq %>% filter(id == subN & curve == 2 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter(id == subN & curve == 2 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = reds6[3]) +
+      geom_point(data = qq %>% filter(id == subN & curve == 2 & threshold==50 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter(id == subN & curve == 2 & threshold==50 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter(id == subN & curve == 2 & threshold==50 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
 
   
   
-        geom_point(data = qq %>% filter(id == subN & curve == 3 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_75), size = 0.5, color = greys6[6]) +
-  geom_point(data = qq %>% filter(id == subN & curve == 3 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_75), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter(id == subN & curve == 3 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_75), size = 0.5, color = reds6[3]) +
+        geom_point(data = qq %>% filter(id == subN & curve == 3 & threshold==75 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter(id == subN & curve == 3 & threshold==75 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter(id == subN & curve == 3 & threshold==75 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
 
   
 
@@ -316,8 +372,8 @@ ggplot(df_resp %>% filter(id == subN), mapping = aes(x = coldT, y = warmT)) +
       geom_point(data = df_vas %>% filter(id == subN & warmT != 30 & coldT !=30), mapping = aes(x = coldT, y = warmT, shape = as.factor(threshold)), size = 2) +
 
       # add cpt and hpt as dashed lines
-      geom_hline(yintercept = limits$hpt, linetype="dashed", color = "red") +
-      geom_vline(xintercept = limits$cpt, linetype="dashed", color = "blue") +
+      geom_hline(yintercept = hpt$threshold, linetype="dashed", color = "red") +
+      geom_vline(xintercept = cpt$threshold, linetype="dashed", color = "blue") +
 
       # set axis
       scale_x_continuous(breaks=seq(0,30,by=3)) + # change x axis
@@ -328,7 +384,16 @@ ggplot(df_resp %>% filter(id == subN), mapping = aes(x = coldT, y = warmT)) +
 
 #a plot for all
 ```{r, fig.height=7.5,fig.width=10}
-ggplot(df_resp, mapping = aes(x = coldT, y = warmT)) +
+df_resp_filtered <- filter(df_resp,id %in% sublist) 
+df_vas_filtered <- filter(df_vas,id %in% sublist) 
+limits <- df_lims %>% filter(trial_n == PsiNtrials,id %in% sublist)
+
+# add cpt and hpt as dashed lines
+      cpt <- limits %>% filter(quality=='cold')
+      hpt <- limits %>% filter(quality=='warm')
+      
+
+ggplot(df_resp_filtered, mapping = aes(x = coldT, y = warmT)) +
       theme_bw() +
       geom_point(aes(color = as.factor(cold_warm))) + # display tested data points + 
       geom_jitter(aes(color = as.factor(cold_warm)))+
@@ -337,29 +402,29 @@ ggplot(df_resp, mapping = aes(x = coldT, y = warmT)) +
 
       # add threshold function for every curve
   
-        geom_point(data = qq %>% filter(curve == 1 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_25), size = 0.5, color = greys6[6]) +
-  geom_point(data = qq %>% filter( curve == 1 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_25), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter(curve == 1 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_25), size = 0.5, color = reds6[3]) +
+        geom_point(data = qq %>% filter(curve == 1 & threshold==25 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter( curve == 1 & threshold==25 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter(curve == 1 & threshold==25 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
 
   
-      geom_point(data = qq %>% filter( curve == 2 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = greys6[6]) +
-  geom_point(data = qq %>% filter( curve == 2 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter( curve == 2 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = reds6[3]) +
+      geom_point(data = qq %>% filter( curve == 2 & threshold==50 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter( curve == 2 & threshold==50 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter( curve == 2 & threshold==50 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
 
   
   
-        geom_point(data = qq %>% filter( curve == 3 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_75), size = 0.5, color = greys6[6]) +
-  geom_point(data = qq %>% filter( curve == 3 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_75), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter( curve == 3 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_75), size = 0.5, color = reds6[3]) +
+        geom_point(data = qq %>% filter( curve == 3 & threshold==75 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter( curve == 3 & threshold==75 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter( curve == 3 & threshold==75 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
 
   
 
       # add vas points that were tested
-      geom_point(data = df_vas %>% filter( warmT != 30 & coldT !=30), mapping = aes(x = coldT, y = warmT, shape = as.factor(threshold)), size = 2) +
+      geom_point(data = df_vas_filtered %>% filter( warmT != 30 & coldT !=30), mapping = aes(x = coldT, y = warmT, shape = as.factor(threshold)), size = 2) +
 
       # add cpt and hpt as dashed lines
-      geom_hline(data = df_lims, aes(yintercept = hpt), linetype="dashed", color = "red") +
-      geom_vline(data = df_lims, aes(xintercept = cpt), linetype="dashed", color = "blue") +
+      geom_hline(data = hpt, aes(yintercept = threshold), linetype="dashed", color = "red") +
+      geom_vline(data = cpt, aes(xintercept = threshold), linetype="dashed", color = "blue") +
 
       # set axis
       scale_x_continuous(breaks=seq(0,30,by=3)) + # change x axis
@@ -372,21 +437,21 @@ ggplot(df_resp, mapping = aes(x = coldT, y = warmT)) +
 
 
 
-```{r Plotting the 50% threshhold function for all participants, fig.height=7.5, fig.width=10}
-
-ids = qq %>% filter(curve == 2 & as.character(colour) == "grey") %>% group_by(id) %>% summarise(
+#```{r Plotting the 50% threshhold function for all participants, fig.height=7.5, fig.width=10}
+```{r}
+ids = qq %>% filter(curve == 2 & threshold==50 & as.character(colour) == "grey") %>% group_by(id) %>% summarise(
   label_position_x=mean(tcold,na.rm=T),
-  label_position_y=mean(twarm_50,na.rm=T),
+  label_position_y=mean(twarm,na.rm=T),
   label_value=id
 )
 ggplot() +
       theme_bw() +
      
       # add threshold function
-  geom_point(data = qq %>% filter(curve == 2 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = greys6[6]) +
+  geom_point(data = qq %>% filter(curve == 2 & threshold==50 & as.character(colour) == "grey"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = greys6[6]) +
 #  geom_text(data = ids, aes(x = label_position_x, y = label_position_y,label = label_value))+  
-  geom_point(data = qq %>% filter(curve == 2 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = blues6[3]) +
-  geom_point(data = qq %>% filter(curve == 2 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm_50), size = 0.5, color = reds6[3]) +
+  geom_point(data = qq %>% filter(curve == 2 & threshold==50 & as.character(colour) == "blue"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = blues6[3]) +
+  geom_point(data = qq %>% filter(curve == 2 & threshold==50 & as.character(colour) == "red"), mapping = aes(x = tcold, y = twarm), size = 0.5, color = reds6[3]) +
   
   
       # set axis
@@ -403,11 +468,7 @@ ggplot() +
 # Plot ratings per participant (sanity checks)
 
 ```{r}
-path <- "/Users/au706606/Library/CloudStorage/OneDrive-Personal/PostDoc/Multidim_Thr/data/Experiment-Part1"
-filename <- 'allData.csv'
-setwd(path) # set working directory
-df <- read.csv(file.path(path,filename))
-
+df <- vas
 df_summary <- aggregate(list(vas_median = df$vasResponse, vasRT_median = df$vasReactionTime), by = list(id = df$SubID, threshold = df$thresholdProb, level = df$gainFract, stim = df$StimType, vas = df$vasType), FUN = median)
 df_summary$id <- factor(df_summary$id)
 df_summary$stim <- factor(df_summary$stim, levels = c("Cold", "Warm", "TGI"))
