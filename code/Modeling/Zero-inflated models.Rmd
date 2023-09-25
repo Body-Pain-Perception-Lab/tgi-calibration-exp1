@@ -25,6 +25,14 @@ alldata <- read.csv(here::here("data","vas.csv"))
 # Select only participants with all VAS ratings
 desired_participants <- c("3", "4", "5", "6", "8", "11", "16", "17", "18", "20", "21", "22", "24", "25", "26")
 df<-filter(alldata,sub %in% desired_participants, ses %in% c("1"))
+
+#df<-filter(alldata,ses %in% c("1"))
+
+#alldata <- read.csv(here::here("code","Modeling","allData.csv")) 
+# Select only participants with all VAS ratings
+#desired_participants <- c("3", "4", "5", "6", "8", "11", "16", "17", "18", "20", "21", "22", "24", "25", "26")
+#df<-filter(alldata,SubID %in% desired_participants)
+
 ```
 
 
@@ -304,10 +312,12 @@ plot(main_burn)
 #here the zero part is nu and the one part is tau
 source(here::here("code","Modeling","scripts","utility functions.R"))
 
-get_prob(model = main_burn,
+  get_prob(model = main_burn,
          data = dfburn,
          what = "nu")
 
+  
+  summary(main_burn)
 ```
 
 ```{r, fig.height=7.5, fig.width=10}
