@@ -19,28 +19,32 @@ function df = psi2tsv(path, project, sub_n, ses_n, task, datatype)
         %%%% Need to find out whether something should be done with PM fit
         %%%% to determine warm and cold threshold - to be added
         cold_threshold = Results.threshold;
-        cold_se = Results.seThreshold;
+        cold_seThreshold = Results.seThreshold;
+        cold_slope = Results.slope;
+        cold_seSlope = Results.seSlope;
         
         load(filename_warm)
         warm_threshold = Results.threshold;
-        warm_se = Results.seThreshold;
+        warm_seThreshold = Results.seThreshold;
+        warm_slope = Results.slope;
+        warm_seSlope = Results.seSlope;
         
         if plot == true % plot each
             figure(1)
             plot(cold_threshold);
             hold on
-            plot(cold_threshold - cold_se)
+            plot(cold_threshold - cold_seThreshold)
             hold on
-            plot(cold_threshold + cold_se)
+            plot(cold_threshold + cold_seThreshold)
             title(sprintf('Cold Threshold %s, %s', subject, session))
             xlabel('Trial N')
             
             figure(2)
             plot(warm_threshold)
             hold on
-            plot(warm_threshold - warm_se)
+            plot(warm_threshold - warm_seThreshold)
             hold on
-            plot(warm_threshold + warm_se)
+            plot(warm_threshold + warm_seThreshold)
             title(sprintf('Warm Threshold %s, %s', subject, session))
             xlabel('Trial N')
         
@@ -60,10 +64,12 @@ function df = psi2tsv(path, project, sub_n, ses_n, task, datatype)
         trial_n = [transpose(1:length(cold_threshold)); transpose(1:length(warm_threshold))];
         quality = [repmat('cold',length(cold_threshold),1); repmat('warm',length(cold_threshold),1)]; 
         threshold = [cold_threshold; warm_threshold];
-        se = [cold_se; warm_se];
+        threshold_se = [cold_seThreshold; warm_seThreshold];
+        slope = [cold_slope; warm_slope];
+        slope_se = [cold_seSlope; warm_seSlope];
 
         % create table
-        df = table(sub, ses, task, datatype, trial_n, quality, threshold, se);
+        df = table(sub, ses, task, datatype, trial_n, quality, threshold, threshold_se, slope, slope_se);
          
 %         % make the data-frame (threshold values)
 %         n = 2;
