@@ -2,6 +2,10 @@
 title: "Data preparation"
 output: html_notebook
 ---
+```{r}
+#clear all
+rm(list=ls())
+```
 
 # Load required packages 
 ```{r warning=FALSE}
@@ -19,11 +23,18 @@ tasks <- c("vas", "fastEst", "fastTrl", "psi")
 filenames <- c("vas.csv", "fastEst.csv", "fastTrl.csv", "psi.csv")
 
 # Define how to load the data: from the "data" folder in GitHub or from an external folder (eg., cortex)
-data_option <- "github" # or "cortex"
+data_option <- "read_bids" #"github" # or "cortex"
 
 # Parameters for the read_bids option
 if (data_option == "cortex") {
   projdir <- "/mnt/cortex/bpp/MINDLAB2022_CalibrationTGI" # cortex
+  sub <- 1:28     # TO UPDATE BASED ON DATA COLLECTION
+  ses <- 1:2
+  dat <- "beh"
+  save <- TRUE
+}
+if (data_option == "read_bids") {
+  projdir <- "/Users/au706606/Downloads/MINDLAB2022_CalibrationTGI"
   sub <- 1:28     # TO UPDATE BASED ON DATA COLLECTION
   ses <- 1:2
   dat <- "beh"
@@ -131,7 +142,8 @@ df_summary
 # Calculate median of VAS ratings and VAS response times
 vas_temps <- vas %>%
   group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%
-  summarize(temp_cold = mean(target_cold_t1), temp_warm = mean(target_warm_t1))
+  #summarize(temp_cold = mean(target_cold_t1), temp_warm = mean(target_warm_t1))
+  summarize(temp_cold = mean(target_cold), temp_warm = mean(target_warm))
 
 vas_ratings <- vas %>%
   group_by(sub, ses, threshold, gain, stim_type, vas_type) %>%
