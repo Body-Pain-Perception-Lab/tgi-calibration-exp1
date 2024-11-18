@@ -1,0 +1,56 @@
+---
+title: "Supplementary"
+author: "Jesper Fischer Ehmsen"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# This is the markdown for reproducing the supplementary analyses and results of the paper titled "Assessing Individual Sensitivity to the Thermal Grill Illusion: A Two-Dimensional Adaptive Psychophysical Approach" 
+
+# Load packages, models and scripts
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(ggplot2, tidyverse, DHARMa, glmmTMB, reshape, gamlss, scales, flextable)
+source(here::here("scripts","Utility_functions.R"))
+load(here::here("Workspace","supplementary_workspace.RData"))
+
+```
+
+
+# Make the tables
+```{r}
+
+table_main_cold = get_main_tables(main_cold,
+          2)%>% 
+      set_caption(caption = " ") %>%  #this is above the table
+  add_footer_lines("Table 1, Cold ratings") #this is below
+
+table_main_warm = get_main_tables(main_warm,
+          2)%>% 
+      set_caption(caption = " ") %>%  #this is above the table
+  add_footer_lines("Table 2, Warm ratings") #this is below
+
+table_main_burn = get_main_tables(main_burn,
+          2)%>% 
+      set_caption(caption = " ") %>%  #this is above the table
+  add_footer_lines("Table 3, Burn ratings") #this is below
+
+table_main_sensation = get_main_tables(main_sensation,
+          2)%>% 
+      set_caption(caption = " ") %>%  #this is above the table
+  add_footer_lines("Table 4, Thermosensory index") #this is below
+
+```
+
+
+# Saving tables to the markdown that knits the supplementary
+```{r}
+# Combine the variable names into a single vector
+tables <- ls(pattern = "^table_")
+
+vars_to_save <- c(tables)
+
+# Save the variables to a file
+save(list = vars_to_save, file = here::here("Workspace","tables_for_supplementary.RData"))
+```
+

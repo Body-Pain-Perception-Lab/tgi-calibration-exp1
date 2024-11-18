@@ -1,0 +1,93 @@
+---
+title: "Supplementary material"
+author: "jesper fischer ehmsen"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+#Loading packages
+knitr::opts_chunk$set(echo = TRUE)
+required_packages = c("cowplot", "magick", "tidyverse", "flextable", "osfr", "bayestestR","ggh4x","patchwork")
+lapply(required_packages, library, character.only = TRUE)
+
+base::load(here::here("Workspace", "tables_for_supplementary.RData"))
+source(here::here("scripts","plots.R"))
+```
+
+
+
+
+<a id="Supplementary_Results"></a>
+
+### **Supplementary Material**
+
+```{r figure S1, fig.width = 8, fig.height = 6, warning = F, message = F, echo = F, fig.cap = "**Fig S1. Trial-by-trial estimates for each parameter characterizing the TGPF.** Each participant is represented by a light gray line, while the thick violet line depicts the group mean estimate on each trial, and the shaded purple lines the 95% confidence interval."}
+
+ggdraw() +
+    draw_image(magick::image_read(here::here("Figures","figS1_conv_means.png")), scale = 1)
+
+```
+
+\newpage
+
+```{r figure S2, fig.width = 8, fig.height = 5, warning = F, message = F, echo = F, fig.cap = "**Fig S2. Staircase convergence of TGPFs parameters in our sample of N = 43 individuals.** Staircase convergence of all parameters, computed as the posterior dispersion for all participants (mean and 95% confidence interval in purple), indicating a discernible and steep decrease over the course of the experiment. Each participant is represented by a light gray line."}
+
+
+ggdraw() +
+    draw_image(magick::image_read(here::here("Figures","figS2_conv_se.png")), scale = 1)
+
+```
+
+
+
+
+```{r figure S3, fig.width = 8, fig.height = 5, warning = F, message = F, echo = F, fig.cap = paste0("**Fig S3. Cold Pain Psychometric Functions.** Distribution of the threshold and slope parameters, as well as pain psychometric functions for each individual and at the group-level. The shaded area around the group-level PF indicates the 95% confidence interval. The dashed line represents the group mean cold temperature (",round(CPT_plot()[[2]]$mean,1) ,"°C) required to elicit pain with a 50% probability. The 95% confidence interval around this mean corresponds to [" ,round(CPT_plot()[[2]]$CI_low,1), "°C ; ",round(CPT_plot()[[2]]$CI_high,1) ,"°C] obtained through bootstrapping.")}
+
+ggdraw() +
+    draw_image(magick::image_read(here::here("Figures","figS3_cpt.png")), scale = 1)
+```
+
+```{r figure S4, fig.width = 8, fig.height = 6, warning = F, message = F, echo = F, fig.cap = paste0("**Fig S4. Heat Pain Psychometric Functions.** Distribution of the threshold and slope parameters, as well as pain psychometric functions for each individual and at the group-level. The shaded area around the group-level PF indicates the 95% confidence interval. The dashed line represents the group mean warm temperature (",round(HPT_plot()[[2]]$mean,1),"°C) required to elicit pain with a 50% probability. The 95% confidence interval around this mean corresponds to [",round(HPT_plot()[[2]]$CI_low,1),"°C ; ",round(HPT_plot()[[2]]$CI_high,1),"°C] obtained through bootstrapping.")}
+
+ggdraw() +
+    draw_image(magick::image_read(here::here("Figures","figS4_hpt.png")), scale = 1)
+```
+
+
+```{r figure S5, fig.width = 8, fig.height = 6, warning = F, message = F, echo = F, fig.cap = paste0("**Fig S5. Responsivity index conditional on burning probabilities.** The figure displays the responsivity index for the burning probability of p = [0.25,0.50,0.75]. The responsivity index is calculated as the difference between the mean burning rating of either the unimodal cold or warm (the highest is selected) and the burning rating elicited by the temperature combinations. Positive values indicate higher burning perception during TGI compared to the unimodal stimulus, 0 means no difference in the burning sensation across stimulus typed, and negative values indicate higher burning sensations for the unimodal stimulus compared to the temperature pairs. Using uncertainty propagation, we calculated the 68% confidence interval for the responsivity index of each participant. The y-axis represents participant IDs; however, the order of the participant IDs is rearranged based on the magnitude of the thermosensory index (from low to high) for each burning probability. This analysis demonstrates how TGI responsivity can be characterized as a continuous variable.")}
+
+ggdraw() +
+    draw_image(magick::image_read(here::here("Figures","figS5_burningthresholds.png")), scale = 1)
+```
+
+
+**Supplementary Tables (S1-S4)**
+These supplementary tables present the formulation of four distinct models: cold, warm, burning VAS ratings, and the thermosensory index. For each model, fixed and random effects are specified in the first row.  We report all parameters (, ,  and  ) of each mixture model (i.e., the zero-one inflated beta regression), as well as the contrasts for all fixed effects. The parameters are as follows:  is the mean of the beta distribution,  is standard deviation of the beta distribution,  is the proportion of zero from a Bernoulli distribution and lastly  is the proportion of ones, also from a Bernoulli distribution.
+
+\newpage
+#### **Cold ratings** {#Table_S1}
+```{r Table_1, warning = F, message = F, echo = F}
+table_main_cold
+```
+\newpage
+#### **Warm ratings**{#Table_S2}
+
+```{r Table_2, warning = F, message = F, echo = F}
+table_main_warm
+```
+\newpage
+#### **Burning ratings**{#Table_S3}
+
+```{r Table_3, warning = F, message = F, echo = F}
+table_main_burn
+```
+\newpage
+#### **Thermosensory Index**{#Table_S4}
+```{r Table_4, warning = F, message = F, echo = F}
+table_main_sensation
+```
+
+

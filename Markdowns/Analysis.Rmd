@@ -1,0 +1,353 @@
+---
+title: "Analysis"
+author: "Jesper Fischer Ehmsen"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# This is the markdown for reproducing the analyses and results of the paper titled "Assessing Individual Sensitivity to the Thermal Grill Illusion: A Two-Dimensional Adaptive Psychophysical Approach" 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(ggplot2, tidyverse, DHARMa, glmmTMB, reshape, gamlss, scales)
+```
+
+## Load the data:
+```{r}
+source(here::here("scripts","Utility_functions.R"))
+
+df = prep_data(per_threshold = F)
+
+```
+
+
+
+### Here, you can access to the models directly, avoiding the need to rerun them, which can save considerable time.
+```{r}
+load(here::here("Workspace","supplementary_workspace.RData"))
+```
+
+
+## Reliable calibration of the Thermal Grill Illusion across individuals
+
+### Cold Ratings
+```{r}
+
+dfcold = df %>% dplyr::select(ID, Trial_N, Quartile, Burning_prob, Stim_dur, experiment, VAS_Cold, Stimulus,Location) %>% 
+  mutate(Location = as.factor(Location))
+
+
+dfcold$Stimulus = relevel(dfcold$Stimulus, ref = "TGI")
+
+## Due to singular convergence have to not include regressors on 0's
+
+main_cold <- gamlss(VAS_Cold ~ Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 | experiment/ID), #+vasReactionTime_Cold
+           nu.formula = ~1 + re(random = ~ 1 |  experiment/ID),#1,
+           tau.formula = ~ 1 + re(random = ~ 1 |  experiment/ID),#1, 
+           sigma.formula = ~1 + Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 |  experiment/ID),
+           data = dfcold,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+summary(main_cold)
+
+# Statistics for manuscript
+stats_main_cold <- summary_stats_zoib_new(main_cold, coefficients = 8, round = 2, part = "mu")
+
+# Simulated residuals:
+plot(main_cold)
+```
+
+### Warm Ratings
+```{r}
+
+dfwarm = df %>% dplyr::select(ID, Trial_N, Quartile, Burning_prob,Stim_dur, experiment, VAS_Warm, Stimulus,Location)%>% 
+  mutate(Location = as.factor(Location))
+
+dfwarm$Stimulus = relevel(dfwarm$Stimulus, ref = "TGI")
+
+main_warm <- gamlss(VAS_Warm ~ Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 | experiment/ID), #+vasReactionTime_Cold
+           nu.formula = ~ Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 |  experiment/ID),#1,
+           tau.formula = ~ 1 + re(random = ~ 1 |  experiment/ID),#1, 
+           sigma.formula = ~ Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 | experiment/ID),
+           data = dfwarm,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+summary(main_warm)
+  
+# Statistics for manuscript
+stats_main_warm <- summary_stats_zoib_new(main_warm, coefficients = 8, round = 2, part = "mu")
+
+# Simulated residuals:
+plot(main_warm)
+
+```
+
+### Burning Ratings
+```{r}
+
+dfburn = df %>% dplyr::select(ID, Trial_N, Quartile, Burning_prob, Stim_dur, experiment, VAS_Burn, Stimulus, Location)%>% 
+  mutate(Location = as.factor(Location))
+
+dfburn$Stimulus = relevel(dfburn$Stimulus, ref = "TGI")
+
+
+main_burn<- gamlss(VAS_Burn ~ Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 | experiment/ID), #+vasReactionTime_Cold
+           nu.formula = ~ Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 |  experiment/ID),#1,
+           tau.formula = ~ 1 + re(random = ~ 1 |  experiment/ID),#1, 
+           sigma.formula = ~1 + Stimulus * Burning_prob + Quartile + Trial_N + Stim_dur + re(random = ~ 1 |  experiment/ID),
+           data = dfburn,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = F))
+
+summary(main_burn)
+
+# Statistics for manuscript
+stats_main_burn <- summary_stats_zoib_new(main_burn, coefficients = 8, round = 2, part = "mu")
+
+# Simulated residuals:
+plot(main_burn)
+```
+
+# Thermosensory index
+```{r}
+# Testing the quality of the sensation
+
+# Normalized difference
+df$coldwarm_ratio <- df$VAS_Cold / (df$VAS_Cold + df$VAS_Warm)
+
+df_coldwarm <- df%>% dplyr::select(coldwarm_ratio, Burning_prob, Quartile, Trial_N, Stim_dur, ID, Stimulus,experiment,Location) %>% drop_na() %>% 
+  mutate(Location = as.factor(Location))
+
+df_coldwarm$Stimulus = relevel(df_coldwarm$Stimulus, ref = "TGI")
+
+main_sensation <- gamlss(coldwarm_ratio ~  Burning_prob + Quartile * Stimulus + Trial_N + Stim_dur + re(random = ~ 1 |  experiment/ID),
+           nu.formula = ~ Stimulus + re(random = ~ 1 |  ID),
+           tau.formula = ~ Stimulus + re(random = ~ 1 |  ID),
+           sigma.formula = ~  Burning_prob + Quartile * Stimulus + Trial_N + Stim_dur + re(random = ~ 1 |  experiment/ID),
+           data = df_coldwarm,
+           family = BEINF(mu.link = "logit",sigma.link = "logit",nu.link = "logit",tau.link = "logit"),
+           control = gamlss.control(n.cyc = 50, trace = T))
+
+# Summary of the regression
+summary(main_sensation)
+
+# Statistics for manuscript
+stats_main_sensation <- summary_stats_zoib_new(main_sensation, coefficients = 10, round = 2, part = "mu")
+
+# Simulated residuals:
+plot(main_sensation)
+
+
+```
+
+# Getting the data from the TGIF for reporting
+```{r, fig.height=6, fig.width=8}
+alldata <- read.csv(here::here("data","fastTrl.csv")) 
+
+#parameter means and standard erros:
+parameters = c("t0","t30","alpha","S")
+errors = paste0(parameters, "_se")
+
+#getting the means (last trial of PSI)
+q = alldata %>% 
+  dplyr::group_by(sub) %>% 
+  summarize(lastS = last(S), lastt0 = last(t0), lastt30 = last(t30), lastalpha = last(alpha)) %>% 
+  pivot_longer(cols = paste0("last",parameters), values_to = "mean_values", names_to = "parameters")
+
+#getting the standard errors (last trial of PSI)
+q_se = alldata %>% 
+  dplyr::group_by(sub) %>% 
+  summarize(lastS_se = last(S_se), lastt0_se = last(t0_se), lastt30_se = last(t30_se), lastalpha_se = last(alpha_se)) %>% 
+  pivot_longer(cols = paste0("last",parameters,"_se"), values_to = "se_values", names_to = "parameters") %>% mutate(parameters = str_remove(parameters, "_se"))
+
+#combine
+vals = inner_join(q,q_se)
+
+
+# for each parameter we do bootstrapping to get real group level estiamtes:
+params_df = data.frame()
+
+for(parameter in parameters){
+  
+  #get the right parameter:
+  parameter = paste0("last",parameter)
+  
+  #Lazy way of no error propergation:
+  without_error_prop = vals %>% filter(parameters == parameter) %>% summarize(mean = mean(mean_values), sd = sd(mean_values))
+  
+  #with:
+  with_error_prop = vals %>% filter(parameters == parameter) %>% rowwise() %>% 
+    mutate(new_mean = list(rnorm(10000,mean_values, se_values))) %>% 
+    unnest() %>% summarize(mean = mean(new_mean), sd = sd(new_mean))
+  
+  #save data.
+  params_df = rbind(params_df,without_error_prop %>% mutate(error_prop = "F", parameters = parameter))
+  params_df = rbind(params_df,with_error_prop %>% mutate(error_prop = "T", parameters = parameter))
+}
+
+# Plotting to demonstrate: the difference
+vals %>% mutate(error_prop = NA) %>% ggplot()+
+  geom_pointrange(aes(x = sub, y = mean_values, ymin = mean_values - 2 * se_values, ymax = mean_values + 2 * se_values))+
+  facet_wrap(~parameters, scales = "free")+
+  geom_pointrange(data = params_df, aes(x = 0, y = mean, ymin = mean - 2 * sd, ymax = mean + 2 * sd, col = error_prop), position = position_dodge(width = 3), alpha = 1)
+
+
+# saving only the error proporgation
+TGIF_parameters = params_df %>% filter(error_prop == "T")
+```
+
+# Cold pain thresholds
+```{r, fig.height=6, fig.width=8}
+
+# Same as for TGI parameters now for cold and heat pain thresholds:
+alldata <- read.csv(here::here("data","psi.csv")) %>% filter(quality == "cold")
+
+parameters = c("threshold","slope")
+errors = paste0(parameters, "_se")
+
+
+q = alldata %>% 
+  dplyr::group_by(sub) %>% 
+  summarize(lastthreshold = last(threshold), lastslope = last(slope)) %>% 
+  pivot_longer(cols = paste0("last",parameters), values_to = "mean_values", names_to = "parameters")
+
+
+q_se = alldata %>% 
+  dplyr::group_by(sub) %>% 
+  summarize(lastthreshold_se = last(threshold_se), lastslope_se = last(slope)) %>% 
+  pivot_longer(cols = paste0("last",parameters,"_se"), values_to = "se_values", names_to = "parameters") %>% mutate(parameters = str_remove(parameters, "_se"))
+
+
+vals = inner_join(q,q_se)
+
+vals %>% ggplot(aes(x = sub, y = mean_values, ymin = mean_values-2*se_values,ymax = mean_values+2*se_values))+geom_pointrange()+facet_wrap(~parameters, scales = "free")
+
+
+params_df = data.frame()
+
+for(parameter in parameters){
+  parameter = paste0("last",parameter)
+  
+  without_error_prop = vals %>% filter(parameters == parameter) %>% summarize(mean = mean(mean_values), sd = sd(mean_values))
+  
+  with_error_prop = vals %>% filter(parameters == parameter) %>% rowwise() %>% 
+    mutate(new_mean = list(rnorm(10000,mean_values, se_values))) %>% 
+    unnest() %>% summarize(mean = mean(new_mean), sd = sd(new_mean))
+
+  params_df = rbind(params_df,without_error_prop %>% mutate(error_prop = "F", parameters = parameter))
+  
+  params_df = rbind(params_df,with_error_prop %>% mutate(error_prop = "T", parameters = parameter))
+  
+}
+
+
+vals %>% mutate(error_prop = NA) %>% ggplot()+
+  geom_pointrange(aes(x = sub, y = mean_values, ymin = mean_values - 2 * se_values, ymax = mean_values + 2 * se_values))+
+  facet_wrap(~parameters, scales = "free")+
+  geom_pointrange(data = params_df, aes(x = 0, y = mean, ymin = mean - 2 * sd, ymax = mean + 2 * sd, col = error_prop), position = position_dodge(width = 3), alpha = 1)
+
+
+#save in a dataframe
+cold_painthresholds = params_df %>% filter(error_prop == "T")
+```
+
+
+# heat pain thresholds
+```{r, fig.height=6, fig.width=8}
+alldata <- read.csv(here::here("data","psi.csv")) %>% filter(quality == "warm")
+
+parameters = c("threshold","slope")
+errors = paste0(parameters, "_se")
+
+
+q = alldata %>% 
+  dplyr::group_by(sub) %>% 
+  summarize(lastthreshold = last(threshold), lastslope = last(slope)) %>% 
+  pivot_longer(cols = paste0("last",parameters), values_to = "mean_values", names_to = "parameters")
+
+
+q_se = alldata %>% 
+  dplyr::group_by(sub) %>% 
+  summarize(lastthreshold_se = last(threshold_se), lastslope_se = last(slope)) %>% 
+  pivot_longer(cols = paste0("last",parameters,"_se"), values_to = "se_values", names_to = "parameters") %>% mutate(parameters = str_remove(parameters, "_se"))
+
+
+
+vals = inner_join(q,q_se)
+
+vals %>% ggplot(aes(x = sub, y = mean_values, ymin = mean_values - 2 * se_values, ymax = mean_values + 2 * se_values)) +
+  geom_pointrange() + 
+  facet_wrap(~parameters, scales = "free")
+
+params_df = data.frame()
+
+for(parameter in parameters){
+  parameter = paste0("last",parameter)
+  
+  without_error_prop = vals %>% filter(parameters == parameter) %>% summarize(mean = mean(mean_values), sd = sd(mean_values))
+  
+  with_error_prop = vals %>% filter(parameters == parameter) %>% rowwise() %>% 
+    mutate(new_mean = list(rnorm(10000,mean_values, se_values))) %>% 
+    unnest() %>% summarize(mean = mean(new_mean), sd = sd(new_mean))
+
+  params_df = rbind(params_df,without_error_prop %>% mutate(error_prop = "F", parameters = parameter))
+  
+  params_df = rbind(params_df,with_error_prop %>% mutate(error_prop = "T", parameters = parameter))
+  
+}
+
+vals %>% mutate(error_prop = NA) %>% ggplot()+
+  geom_pointrange(aes(x = sub, y = mean_values, ymin = mean_values - 2 * se_values, ymax = mean_values + 2 * se_values))+
+  facet_wrap(~parameters, scales = "free") +
+  geom_pointrange(data = params_df, aes(x = 0, y = mean, ymin = mean - 2 * sd, ymax = mean + 2 * sd, col = error_prop), position = position_dodge(width = 3), alpha = 1)
+
+heat_painthresholds = params_df %>% filter(error_prop == "T")
+```
+
+
+# getting the proportion of 0 and 1's in the data in each of the 3 qualities. Here i've a function makes sense as there are 6 combinations
+```{r}
+prop_0_cold = get_prop(0, df,quality = "Cold")*100
+prop_1_cold = get_prop(1, df,quality = "Cold")*100
+
+prop_0_warm = get_prop(0, df,quality = "Warm")*100
+prop_1_warm = get_prop(1, df,quality = "Warm")*100
+
+prop_0_burn = get_prop(0, df,quality = "Burn")*100
+prop_1_burn = get_prop(1, df,quality = "Burn")*100
+```
+
+
+# Now we save the results for the manuscript! 
+
+```{r Saving reporting statistics}
+# Get a list of all variable names that start with "stats_"
+stats_vars <- ls(pattern = "^stats_")
+
+props <- ls(pattern = "^prop_")
+
+# # Combine the variable names into a single vector
+vars_to_save <- c(stats_vars, props, "TGIF_parameters", "heat_painthresholds", "cold_painthresholds")
+#
+# # Save the variables to a file
+base::save(list = vars_to_save, file = here::here( "Workspace", "reporting_statistics.RData"))
+
+```
+
+# Now we save the results for the supplemenary material!
+
+```{r Saving variables / models To run Supplementary analysis alone}
+
+# Combine the variable names into a single vector
+vars_to_save <- c(
+  "main_warm", "dfwarm",
+  "main_cold", "dfcold",
+  "main_burn", "dfburn",
+  "main_sensation","df_coldwarm"
+)
+
+# Save the variables to a file
+base::save(list = vars_to_save, file = here::here( "Workspace", "supplementary_workspace.RData"),compress = "xz")
+```
