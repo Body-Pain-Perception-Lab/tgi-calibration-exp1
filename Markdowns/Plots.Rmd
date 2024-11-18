@@ -17,10 +17,10 @@ source(here::here("scripts","plots.R"))
 ```
 
 # Figure 3
-```{r, fig.width=6,fig.height=6}
+```{r, fig.width=7.2,fig.height=6}
 plot_3 = plot3()
 plot_3
-ggsave(here::here("Figures","fig3.png"), plot_3[[1]], dpi = 600, height = 6, width = 6)
+ggsave(here::here("Figures","fig3.tiff"), plot_3[[1]], dpi = 600, height = 6, width = 7.2)
 write.csv(plot_3[[2]],here::here("Figures","fig3_report.csv"))
 
 ```
@@ -38,65 +38,65 @@ subers_full_section = c(3,4,5,6,8,17,18,21,25,26,30,34,38,39,41,42)
 plot_4 = plot4(tminwarm = 30, tmaxwarm = 50, subers = subers_full_section)
 
 plot_4
-ggsave(here::here("Figures","fig4.png"), plot_4[[1]], dpi = 600, height = 7.2, width = 7.2)
+ggsave(here::here("Figures","fig4.tiff"), plot_4[[1]], dpi = 600, height = 7.2, width = 7.2)
 ```
 
 # Figure 5
 
-```{r, fig.width=8,fig.height=6}
+```{r, fig.width=7.2,fig.height=6}
 plot5 = plot5()
 plot5
-ggsave(here::here("Figures","fig5.png"), plot5, dpi = 600, width = 8, height = 6)
+ggsave(here::here("Figures","fig5.tiff"), plot5, dpi = 600, width = 7.2, height = 6)
 
 ```
 
 # Figure 6
 
-```{r, fig.width=6,fig.height=4}
+```{r, fig.width=7.2,fig.height=5}
 
 plot6 = plot6()
 plot6
-ggsave(here::here("Figures","fig6.png"), plot6, dpi = 600, width = 6, height = 4)
+ggsave(here::here("Figures","fig6.tiff"), plot6, dpi = 600, width = 7.2, height = 5)
 
 ```
 
 # Figure 7
-```{r, fig.width=6, fig.height=4}
+```{r, fig.width=7.2, fig.height=5}
 plot7 = plot7()
 plot7
-ggsave(here::here("Figures","fig7.png"), plot7, dpi = 600, width = 6, height = 4)
+ggsave(here::here("Figures","fig7.tiff"), plot7, dpi = 600, width = 7.2, height = 5)
 ```
 
 # Supplementary convergence plots
-```{r, fig.width=8,fig.height=6}
+```{r, fig.width=7.2,fig.height=6}
 conv_plot = conv_plot()
 conv_means = conv_plot[[1]]
 conv_se = conv_plot[[2]]
-ggsave(here::here("Figures","figS1_conv_means.png"), conv_means, dpi = 600, height = 6, width = 8)
-ggsave(here::here("Figures","figS2_conv_se.png"), conv_se, dpi = 600, height = 6, width = 8)
+ggsave(here::here("Figures","figS1_conv_means.tiff"), conv_means, dpi = 600, height = 6, width = 7.2)
+ggsave(here::here("Figures","figS2_conv_se.tiff"), conv_se, dpi = 600, height = 6, width = 7.2)
 ```
 
 
 # Supplementary Cold pain threshold
-```{r, fig.width=8,fig.height=6}
+```{r, fig.width=7.2,fig.height=6}
 CPT = CPT_plot()[[1]]
 CPT
-ggsave(here::here("Figures","figS3_cpt.png"), CPT, dpi = 600, height = 6, width = 8)
+ggsave(here::here("Figures","figS3_cpt.tiff"), CPT, dpi = 600, height = 6, width = 7.2)
 ```
 
 # Supplementary Heat pain threshold
-```{r, fig.width=8,fig.height=6}
+```{r, fig.width=7.2,fig.height=6}
 HPT = HPT_plot()[[1]]
 HPT
-ggsave(here::here("Figures","figS4_hpt.png"), HPT, dpi = 600, height = 6, width = 8)
+ggsave(here::here("Figures","figS4_hpt.tiff"), HPT, dpi = 600, height = 6, width = 7.2)
 ```
 
 
 # Supplementary plot 7 with all burning thresholds
-```{r, fig.width=8,fig.height=6}
+```{r, fig.width=7.2,fig.height=6}
 fullplot7 = Full_plot_7()
 fullplot7
-ggsave(here::here("Figures","figS5_burningthresholds.png"), fullplot7, dpi = 600, height = 6, width = 8)
+ggsave(here::here("Figures","figS5_burningthresholds.tiff"), fullplot7, dpi = 600, height = 6, width = 7.2)
 ```
 
 
