@@ -7,7 +7,8 @@
 
 ## Introduction
 This is all the scripts used to run and generate the results and analyses as well as the manuscript for the paper:
-"Assessing Individual Sensitivity to the Thermal Grill Illusion:  A Two-Dimensional Adaptive Psychophysical Approach".
+"Assessing individual sensitivity to the Thermal Grill Illusion:  a two-dimensional adaptive psychophysical approach".
+
 ## Directory structure
 
 The repository is structured in the following way:
