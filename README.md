@@ -1,20 +1,20 @@
-# Assessing Individual Sensitivity to the Thermal Grill Illusion:  A Two-Dimensional Adaptive Psychophysical Approach 
+# Assessing individual sensitivity to the Thermal Grill Illusion: a two-dimensional adaptive psychophysical approach 
 
 
-## Table of Contents
+## Table of contents
 1. [Introduction](#introduction)
 2. [Directory Structure](#directory-structure)
 
 ## Introduction
 This is all the scripts used to run and generate the results and analyses as well as the manuscript for the paper:
 "Assessing Individual Sensitivity to the Thermal Grill Illusion:  A Two-Dimensional Adaptive Psychophysical Approach".
-## Directory Structure
+## Directory structure
 
 The repository is structured in the following way:
 
 ```         
 Thermal Pain Learning/
-├── README.md             # overview of the project.
+├── README.md             # Overview of the project.
 │
 ├── Figures/              # Figures generated from code to the from the final manuscript.
 │   └── ... 
